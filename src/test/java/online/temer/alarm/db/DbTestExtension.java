@@ -16,6 +16,11 @@ public class DbTestExtension implements
     public void beforeAll(ExtensionContext context) throws SQLException {
         connection = TestConnectionProvider.getConnection();
         connection.setAutoCommit(false);
+
+        new SchemaCreator(TestConnectionProvider.getConnection())
+                .createSchema();
+
+        connection.commit();
     }
 
     @Override
