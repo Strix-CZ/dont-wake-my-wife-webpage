@@ -1,4 +1,4 @@
-package online.temer.alarm.util;
+package online.temer.alarm.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,4 +1,4 @@
-package online.temer.alarm.util;
+package online.temer.alarm.db;
 
 import org.junit.jupiter.api.extension.*;
 
