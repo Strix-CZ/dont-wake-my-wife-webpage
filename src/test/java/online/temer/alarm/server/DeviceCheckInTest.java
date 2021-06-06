@@ -3,7 +3,7 @@ package online.temer.alarm.server;
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.DeviceDto;
-import online.temer.alarm.dto.DeviceUpdateDto;
+import online.temer.alarm.dto.DeviceCheckInDto;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -55,8 +55,8 @@ public class DeviceCheckInTest
 		doCheckIn(100);
 
 		var before = LocalDateTime.now().withNano(0);
-		var latestUpdate = new DeviceUpdateDto.Query(new TestConnectionProvider().get())
-				.getLatestUpdate(device.id);
+		var latestUpdate = new DeviceCheckInDto.Query(new TestConnectionProvider().get())
+				.getLatest(device.id);
 		var after = LocalDateTime.now().withNano(0);
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");

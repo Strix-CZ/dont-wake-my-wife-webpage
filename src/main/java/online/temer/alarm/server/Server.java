@@ -5,7 +5,7 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.DeviceDto;
-import online.temer.alarm.dto.DeviceUpdateDto;
+import online.temer.alarm.dto.DeviceCheckInDto;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -63,9 +63,9 @@ public class Server
 			return;
 		}
 
-		var deviceUpdateDto = new DeviceUpdateDto(deviceId.get(), LocalDateTime.now(), battery.get());
+		var deviceCheckInDto = new DeviceCheckInDto(deviceId.get(), LocalDateTime.now(), battery.get());
 
-		new DeviceUpdateDto.Query(connection)
-				.insertUpdate(deviceUpdateDto);
+		new DeviceCheckInDto.Query(connection)
+				.insertUpdate(deviceCheckInDto);
 	}
 }

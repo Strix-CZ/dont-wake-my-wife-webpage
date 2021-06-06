@@ -9,19 +9,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-public class DeviceUpdateDto
+public class DeviceCheckInDto
 {
 	public final Long id;
 	public final long device;
 	public final LocalDateTime time;
 	public final int battery;
 
-	public DeviceUpdateDto(long device, LocalDateTime time, int battery)
+	public DeviceCheckInDto(long device, LocalDateTime time, int battery)
 	{
 		this(null, device, time, battery);
 	}
 
-	public DeviceUpdateDto(Long id, long device, LocalDateTime time, int battery)
+	public DeviceCheckInDto(Long id, long device, LocalDateTime time, int battery)
 	{
 		this.id = id;
 		this.device = device;
@@ -38,14 +38,14 @@ public class DeviceUpdateDto
 			this.connection = connection;
 		}
 
-		public DeviceUpdateDto getLatestUpdate(long device)
+		public DeviceCheckInDto getLatest(long device)
 		{
 			try
 			{
 				return new QueryRunner().query(connection,
 						"SELECT id, kDevice device, time, battery " +
-								"FROM DeviceUpdate " +
-								"WHERE id = (SELECT MAX(id) FROM DeviceUpdate WHERE kDevice = ?)",
+								"FROM DeviceCheckIn " +
+								"WHERE id = (SELECT MAX(id) FROM DeviceCheckIn WHERE kDevice = ?)",
 						new Handler(),
 						device);
 			}
@@ -55,12 +55,12 @@ public class DeviceUpdateDto
 			}
 		}
 
-		public long insertUpdate(DeviceUpdateDto update)
+		public long insertUpdate(DeviceCheckInDto update)
 		{
 			try
 			{
 				return new QueryRunner().query(connection,
-						"INSERT INTO DeviceUpdate(kDevice, time, battery) " +
+						"INSERT INTO DeviceCheckIn(kDevice, time, battery) " +
 								"VALUES (?, ?, ?) RETURNING id",
 						new ScalarHandler<>(),
 						update.device, update.time, update.battery);
@@ -72,17 +72,17 @@ public class DeviceUpdateDto
 		}
 	}
 
-	private static class Handler implements ResultSetHandler<DeviceUpdateDto>
+	private static class Handler implements ResultSetHandler<DeviceCheckInDto>
 	{
 		@Override
-		public DeviceUpdateDto handle(ResultSet rs) throws SQLException
+		public DeviceCheckInDto handle(ResultSet rs) throws SQLException
 		{
 			if (!rs.next())
 			{
 				return null;
 			}
 
-			return new DeviceUpdateDto(
+			return new DeviceCheckInDto(
 					rs.getLong("id"),
 					rs.getLong("kDevice"),
 					rs.getTimestamp("time").toLocalDateTime(),
