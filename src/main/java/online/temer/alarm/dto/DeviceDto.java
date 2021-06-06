@@ -34,7 +34,9 @@ public class DeviceDto
 		{
 			try
 			{
-				Long id = new QueryRunner().query(connection, "INSERT INTO Device() VALUES () RETURNING id", new ScalarHandler<>());
+				Long id = new QueryRunner().query(connection,
+						"INSERT INTO Device() VALUES () RETURNING id",
+						new ScalarHandler<>());
 				return get(id);
 			}
 			catch (SQLException e)

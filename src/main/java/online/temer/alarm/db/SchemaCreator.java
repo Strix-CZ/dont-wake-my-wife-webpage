@@ -20,7 +20,7 @@ public class SchemaCreator
 	{
 		String schemaStatements = new ResourceReader().readResourceTextFile("sql/scratch/create_tables.sql");
 
-		for (String sql : splitMultipleSqls(schemaStatements))
+		for (String sql : splitMultipleSql(schemaStatements))
 		{
 			try
 			{
@@ -33,7 +33,7 @@ public class SchemaCreator
 		}
 	}
 
-	public List<String> splitMultipleSqls(String multipleSql)
+	public List<String> splitMultipleSql(String multipleSql)
 	{
 		return Arrays.asList(multipleSql.split(";"));
 	}

@@ -2,7 +2,6 @@ package online.temer.alarm.dto;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,14 +54,13 @@ public class DeviceCheckInDto
 			}
 		}
 
-		public long insertUpdate(DeviceCheckInDto update)
+		public void insertUpdate(DeviceCheckInDto update)
 		{
 			try
 			{
-				return new QueryRunner().query(connection,
+				new QueryRunner().update(connection,
 						"INSERT INTO DeviceCheckIn(kDevice, time, battery) " +
-								"VALUES (?, ?, ?) RETURNING id",
-						new ScalarHandler<>(),
+								"VALUES (?, ?, ?)",
 						update.device, update.time, update.battery);
 			}
 			catch (SQLException e)
