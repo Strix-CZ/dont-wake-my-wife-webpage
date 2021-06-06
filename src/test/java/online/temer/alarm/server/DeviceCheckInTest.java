@@ -13,28 +13,30 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @ExtendWith(DbTestExtension.class)
-public class DeviceCheckInTest {
+public class DeviceCheckInTest
+{
+	private Server server;
 
-    private Server server;
+	@BeforeEach
+	void setUp()
+	{
+		server = new Server(8765, "localhost");
+		server.start();
+	}
 
-    @BeforeEach
-    void setUp() {
-        server = new Server(8765, "localhost");
-        server.start();
-    }
+	@AfterEach
+	void tearDown()
+	{
+		server.stop();
+	}
 
-    @AfterEach
-    void tearDown() {
-        server.stop();
-    }
+	@Test
+	public void serverListens() throws IOException, InterruptedException
+	{
+		var request = HttpRequest.newBuilder()
+				.uri(URI.create("http://localhost:8765/checkin"))
+				.build();
 
-    @Test
-    public void serverListens() throws IOException, InterruptedException {
-
-        var request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8765/checkin"))
-                .build();
-
-        HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString()); // Throws in case of time-out
-    }
+		HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString()); // Throws in case of time-out
+	}
 }

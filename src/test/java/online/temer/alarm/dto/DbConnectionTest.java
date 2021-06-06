@@ -11,18 +11,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @ExtendWith(DbTestExtension.class)
-public class DbConnectionTest {
+public class DbConnectionTest
+{
+	private Connection connection;
 
-    private Connection connection;
+	@BeforeEach
+	public void setUp()
+	{
+		connection = TestConnectionProvider.getConnection();
+	}
 
-    @BeforeEach
-    public void setUp() {
-        connection = TestConnectionProvider.getConnection();
-    }
-
-    @Test
-    public void testConnection() throws SQLException {
-        Assertions.assertNotNull(connection);
-        Assertions.assertTrue(connection.isValid(1));
-    }
+	@Test
+	public void testConnection() throws SQLException
+	{
+		Assertions.assertNotNull(connection);
+		Assertions.assertTrue(connection.isValid(1));
+	}
 }

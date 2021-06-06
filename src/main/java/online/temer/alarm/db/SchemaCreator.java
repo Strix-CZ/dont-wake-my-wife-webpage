@@ -7,28 +7,34 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class SchemaCreator {
-    private final Connection connection;
+public class SchemaCreator
+{
+	private final Connection connection;
 
-    public SchemaCreator(Connection connection) {
-        this.connection = connection;
-    }
+	public SchemaCreator(Connection connection)
+	{
+		this.connection = connection;
+	}
 
-    public void createSchema() {
+	public void createSchema()
+	{
+		String schemaStatements = new ResourceReader().readResourceTextFile("sql/scratch/create_tables.sql");
 
-        String schemaStatements = new ResourceReader().readResourceTextFile("sql/scratch/create_tables.sql");
+		for (String sql : splitMultipleSqls(schemaStatements))
+		{
+			try
+			{
+				connection.prepareStatement(sql).execute();
+			}
+			catch (SQLException e)
+			{
+				throw new RuntimeException("Error when executing SQL\n" + sql + "\n", e);
+			}
+		}
+	}
 
-        for (String sql : splitMultipleSqls(schemaStatements)) {
-            try {
-                connection.prepareStatement(sql).execute();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException("Error when executing SQL\n" + sql + "\n", e);
-            }
-        }
-    }
-
-    public List<String> splitMultipleSqls(String multipleSql) {
-        return Arrays.asList(multipleSql.split(";"));
-    }
+	public List<String> splitMultipleSqls(String multipleSql)
+	{
+		return Arrays.asList(multipleSql.split(";"));
+	}
 }
