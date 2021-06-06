@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
 
 @ExtendWith(DbTestExtension.class)
@@ -19,8 +20,9 @@ class DeviceUpdateDtoTest
 	@BeforeEach
 	void setUp()
 	{
-		query = new DeviceUpdateDto.Query(TestConnectionProvider.getConnection());
-		deviceQuery = new DeviceDto.Query(TestConnectionProvider.getConnection());
+		Connection connection = new TestConnectionProvider().get();
+		query = new DeviceUpdateDto.Query(connection);
+		deviceQuery = new DeviceDto.Query(connection);
 
 		deviceId = deviceQuery.insertDevice().id;
 	}

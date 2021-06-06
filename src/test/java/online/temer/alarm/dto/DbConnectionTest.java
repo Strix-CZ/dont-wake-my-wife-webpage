@@ -18,7 +18,7 @@ public class DbConnectionTest
 	@BeforeEach
 	public void setUp()
 	{
-		connection = TestConnectionProvider.getConnection();
+		connection = new TestConnectionProvider().get();
 	}
 
 	@Test

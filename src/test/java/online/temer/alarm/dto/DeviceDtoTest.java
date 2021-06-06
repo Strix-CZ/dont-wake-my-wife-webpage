@@ -17,7 +17,7 @@ class DeviceDtoTest
 	@BeforeEach
 	void setUp()
 	{
-		query = new DeviceDto.Query(TestConnectionProvider.getConnection());
+		query = new DeviceDto.Query(new TestConnectionProvider().get());
 	}
 
 	@Test

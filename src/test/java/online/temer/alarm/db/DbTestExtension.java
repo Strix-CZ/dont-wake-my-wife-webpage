@@ -13,24 +13,23 @@ public class DbTestExtension implements
 		AfterAllCallback,
 		AfterEachCallback
 {
+	private TestConnectionProvider testConnectionProvider;
 	private Connection connection;
 
 	@Override
-	public void beforeAll(ExtensionContext context) throws SQLException
+	public void beforeAll(ExtensionContext context)
 	{
-		connection = TestConnectionProvider.getConnection();
-		connection.setAutoCommit(false);
+		testConnectionProvider = new TestConnectionProvider();
+		connection = testConnectionProvider.get();
 
-		new SchemaCreator(TestConnectionProvider.getConnection())
+		new SchemaCreator(connection)
 				.createSchema();
-
-		connection.commit();
 	}
 
 	@Override
 	public void afterAll(ExtensionContext extensionContext)
 	{
-		TestConnectionProvider.close();
+		testConnectionProvider.close();
 	}
 
 	@Override

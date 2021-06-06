@@ -12,13 +12,14 @@ public class TestConnectionProvider
 
 	private static Connection connection;
 
-	public static Connection getConnection()
+	public synchronized Connection get()
 	{
 		if (connection == null)
 		{
 			try
 			{
 				connection = DriverManager.getConnection(URL, USER, PASS);
+				connection.setAutoCommit(false);
 			}
 			catch (SQLException e)
 			{
@@ -29,7 +30,7 @@ public class TestConnectionProvider
 		return connection;
 	}
 
-	public static void close()
+	public void close()
 	{
 		try
 		{
