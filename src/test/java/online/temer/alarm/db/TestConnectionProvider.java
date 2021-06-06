@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class TestConnectionProvider
+public class TestConnectionProvider implements ConnectionProvider
 {
 	private static final String URL = "jdbc:mariadb://localhost/alarm_clock_test";
 	private static final String USER = "test";
@@ -12,6 +12,7 @@ public class TestConnectionProvider
 
 	private static Connection connection;
 
+	@Override
 	public synchronized Connection get()
 	{
 		if (connection == null)

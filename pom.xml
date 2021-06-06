@@ -20,22 +20,32 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>2.7.3</version>
         </dependency>
+
         <dependency>
             <groupId>commons-dbutils</groupId>
             <artifactId>commons-dbutils</artifactId>
             <version>1.7</version>
         </dependency>
-		<dependency>
-			<groupId>io.undertow</groupId>
-			<artifactId>undertow-core</artifactId>
-			<version>2.2.8.Final</version>
-		</dependency>
+
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+            <version>2.2.8.Final</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.1</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
 </project>
