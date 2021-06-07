@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 @ExtendWith(DbTestExtension.class)
 class DeviceDtoTest
@@ -29,28 +31,15 @@ class DeviceDtoTest
 	@Test
 	void savingAndLoading_returnsSameDevice()
 	{
-		DeviceDto savedDevice = query.insertDevice();
-		DeviceDto loadedDevice = query.get(savedDevice.id);
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/New_York"));
+		LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
+		long id = query.insertDevice(new DeviceDto(timeCreated, timeZone, "secretKey"));
+		DeviceDto device = query.get(id);
 
-		Assertions.assertNotNull(loadedDevice, "loadedDevice should not be null");
-		Assertions.assertTrue(savedDevice.id > 0, "id was less or equal to zero");
-		Assertions.assertEquals(savedDevice.id, loadedDevice.id, "id");
-		Assertions.assertEquals(savedDevice.timeCreated, loadedDevice.timeCreated, "timeCreated");
-	}
-
-	@Test
-	void correctTimeCreatedTest()
-	{
-		LocalDateTime before = LocalDateTime.now().withNano(0);
-		DeviceDto device = query.insertDevice();
-		LocalDateTime after = LocalDateTime.now().withNano(0);
-
-		Assertions.assertTrue(
-				before.isBefore(device.timeCreated) || before.isEqual(device.timeCreated),
-				"timeCreated is too early");
-
-		Assertions.assertTrue(
-				after.isAfter(device.timeCreated) || after.isEqual(device.timeCreated),
-				"timeCreated is too late");
+		Assertions.assertNotNull(device, "loadedDevice should not be null");
+		Assertions.assertTrue(device.id > 0, "id was less or equal to zero");
+		Assertions.assertEquals(timeCreated, device.timeCreated, "timeCreated");
+		Assertions.assertEquals(timeZone, device.timeZone, "timeZone");
+		Assertions.assertEquals("secretKey", device.secretKey, "secretKey");
 	}
 }

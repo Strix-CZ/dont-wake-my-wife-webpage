@@ -24,7 +24,7 @@ class DeviceCheckInDtoTest
 		query = new DeviceCheckInDto.Query(connection);
 		deviceQuery = new DeviceDto.Query(connection);
 
-		deviceId = deviceQuery.insertDevice().id;
+		deviceId = deviceQuery.insertDevice(DeviceDto.generateDevice());
 	}
 
 	@Test
@@ -63,7 +63,7 @@ class DeviceCheckInDtoTest
 	{
 		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
 
-		long deviceId2 = deviceQuery.insertDevice().id;
+		long deviceId2 = deviceQuery.insertDevice(DeviceDto.generateDevice());
 		query.insertUpdate(new DeviceCheckInDto(deviceId2, LocalDateTime.now(), 50));
 
 		Assertions.assertEquals(100, query.getLatest(deviceId).battery, "battery of first device is 100");

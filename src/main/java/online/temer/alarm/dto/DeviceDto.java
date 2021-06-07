@@ -4,25 +4,53 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 public class DeviceDto
 {
-	public final long id;
+	public final Long id;
 	public final LocalDateTime timeCreated;
+	public final TimeZone timeZone;
+	public final String secretKey;
 
-	public DeviceDto(long id, LocalDateTime timeCreated)
+	public DeviceDto(LocalDateTime timeCreated, TimeZone timeZone, String secretKey)
+	{
+		this(null, timeCreated, timeZone, secretKey);
+	}
+
+	public DeviceDto(Long id, LocalDateTime timeCreated, TimeZone timeZone, String secretKey)
 	{
 		this.id = id;
 		this.timeCreated = timeCreated;
+		this.timeZone = timeZone;
+		this.secretKey = secretKey;
+	}
+
+	public static DeviceDto generateDevice()
+	{
+		String possibleLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
+
+		String secretKey = new SecureRandom().ints()
+				.limit(40)
+				.mapToObj(r -> "" + possibleLetters.charAt(Math.abs(r) % possibleLetters.length()))
+				.collect(Collectors.joining());
+
+		return new DeviceDto(
+				LocalDateTime.now(),
+				TimeZone.getDefault(),
+				secretKey
+		);
 	}
 
 	public static class Query
 	{
-
 		private final Connection connection;
 
 		public Query(Connection connection)
@@ -30,14 +58,15 @@ public class DeviceDto
 			this.connection = connection;
 		}
 
-		public DeviceDto insertDevice()
+		public long insertDevice(DeviceDto device)
 		{
 			try
 			{
-				Long id = new QueryRunner().query(connection,
-						"INSERT INTO Device() VALUES () RETURNING id",
-						new ScalarHandler<>());
-				return get(id);
+				return new QueryRunner().query(connection,
+						"INSERT INTO Device(timeCreated, timeZone, secretKey) "
+								+ "VALUES (?, ?, ?) RETURNING id",
+						new ScalarHandler<>(),
+						device.timeCreated, device.timeZone.toZoneId().getId(), device.secretKey);
 			}
 			catch (SQLException e)
 			{
@@ -51,7 +80,8 @@ public class DeviceDto
 			{
 				return new QueryRunner().query(
 						connection,
-						"SELECT id, timeCreated FROM Device WHERE id = ?",
+						"SELECT id, timeCreated, timeZone, secretKey "
+								+ "FROM Device WHERE id = ?",
 						new Handler(),
 						id);
 			}
@@ -74,7 +104,9 @@ public class DeviceDto
 
 			return new DeviceDto(
 					rs.getLong("id"),
-					rs.getTimestamp("timeCreated").toLocalDateTime()
+					rs.getTimestamp("timeCreated").toLocalDateTime(),
+					TimeZone.getTimeZone(ZoneId.of(rs.getString("timeZone"))),
+					rs.getString("secretKey")
 			);
 		}
 	}

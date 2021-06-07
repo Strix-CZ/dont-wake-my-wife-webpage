@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 public class DeviceCheckInTest
 {
 	private Server server;
-	private DeviceDto device;
+	private long deviceId;
 
 	@BeforeEach
 	void setUp()
@@ -33,8 +33,8 @@ public class DeviceCheckInTest
 		server = new Server(8765, "localhost", testConnectionProvider);
 		server.start();
 
-		device = new DeviceDto.Query(testConnectionProvider.get())
-				.insertDevice();
+		deviceId = new DeviceDto.Query(testConnectionProvider.get())
+				.insertDevice(DeviceDto.generateDevice());
 	}
 
 	@AfterEach
@@ -56,12 +56,12 @@ public class DeviceCheckInTest
 
 		var before = LocalDateTime.now().withNano(0);
 		var latestUpdate = new DeviceCheckInDto.Query(new TestConnectionProvider().get())
-				.getLatest(device.id);
+				.getLatest(deviceId);
 		var after = LocalDateTime.now().withNano(0);
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
 		Assertions.assertTrue(latestUpdate.device > 0, "id was less than 0");
-		Assertions.assertEquals(device.id, latestUpdate.device, "device id");
+		Assertions.assertEquals(deviceId, latestUpdate.device, "device id");
 		Assertions.assertEquals(100, latestUpdate.battery, "battery");
 		Assertions.assertTrue(before.isBefore(latestUpdate.time) || before.isEqual(latestUpdate.time), "Time of update was too soon");
 		Assertions.assertTrue(after.isAfter(latestUpdate.time) || after.isEqual(latestUpdate.time), "Time of update was too late");
@@ -72,7 +72,7 @@ public class DeviceCheckInTest
 		try
 		{
 			URI uri = new URIBuilder("http://localhost:8765/checkin")
-					.addParameter("device", Long.toString(device.id))
+					.addParameter("device", Long.toString(deviceId))
 					.addParameter("battery", Integer.toString(battery))
 					.build();
 
