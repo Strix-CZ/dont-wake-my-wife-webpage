@@ -1,5 +1,7 @@
 package online.temer.alarm.server;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
@@ -33,5 +35,11 @@ public class QueryParameterReader
 	public Optional<Integer> readInt(String name) {
 		return readString(name)
 				.map(Integer::parseInt);
+	}
+
+	public Optional<LocalDateTime> readTime(String name)
+	{
+		return readString(name)
+				.map(timeString -> LocalDateTime.parse(timeString, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 	}
 }
