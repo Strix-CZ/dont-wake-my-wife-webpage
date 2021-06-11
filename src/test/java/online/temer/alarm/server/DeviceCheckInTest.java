@@ -4,6 +4,7 @@ import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -17,8 +18,12 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 @ExtendWith(DbTestExtension.class)
 public class DeviceCheckInTest
@@ -35,7 +40,9 @@ public class DeviceCheckInTest
 		server.start();
 
 		var query = new DeviceDto.Query(testConnectionProvider.get());
-		long id = query.insertDevice(DeviceDto.generateDevice());
+
+		long id = query.insertDevice(
+				DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));
 		device = query.get(id);
 	}
 
@@ -48,55 +55,63 @@ public class DeviceCheckInTest
 	@Test
 	public void serverListens()
 	{
-		doCheckIn(device.id, 0, LocalDateTime.now(), ""); // Throws in case of time-out
+		doCheckIn(device.id, 0, getTimeInDeviceTimeZone(0), ""); // Throws in case of time-out
 	}
 
 	@Test
 	void missingParameter_returns400() throws URISyntaxException
 	{
 		URI uri = new URIBuilder("http://localhost:8765/checkin").build();
-		Assertions.assertEquals(400, doCheckIn(uri));
+		Assertions.assertEquals(400, doCheckIn(uri).statusCode());
 	}
 
 	@Test
 	void unknownDevice_returns400()
 	{
-		int status = doCheckIn(-1, 100, LocalDateTime.now(), "bla");
+		int status = doCheckIn(-1, 100, getTimeInDeviceTimeZone(0), "bla").statusCode();
 		Assertions.assertEquals(400, status);
 	}
 
 	@Test
-	void timeThatIsOff_returns422()
+	void timeThatIsOff_returns422AndCorrectTime()
 	{
-		int status = doCheckIn(device.id, 100, LocalDateTime.now().plusSeconds(15), "bla");
-		Assertions.assertEquals(422, status);
+		TimeAssertion timeAssertion = new TimeAssertion();
+		var response = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(15), "bla");
+		timeAssertion.untilNow();
+
+		Assertions.assertEquals(422, response.statusCode());
+
+		LocalDateTime sentTime = LocalDateTime.parse(response.body().trim(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		timeAssertion.assertCurrentTimeIgnoringNanos(sentTime, device.timeZone);
 	}
 
 	@Test
 	void incorrectHash_returns401()
 	{
-		int status = doCheckIn(device.id, 100, LocalDateTime.now(), "bla");
+		int status = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(0), "bla").statusCode();
 		Assertions.assertEquals(401, status);
 	}
 
 	@Test
 	public void checkIn_storesBattery()
 	{
-		LocalDateTime time = LocalDateTime.now();
-		String hash = CheckInHandler.calculateHash(device.id, time, 100, device.secretKey);
-		doCheckIn(device.id, 100, time, hash);
+		ZonedDateTime time = getTimeInDeviceTimeZone(0);
+		String hash = CheckInHandler.calculateHash(device.id, time.toLocalDateTime(), 100, device.secretKey);
 
-		var before = LocalDateTime.now().withNano(0);
+		var response = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(0), hash);
+
+		Assertions.assertEquals(200, response.statusCode());
+
+		TimeAssertion timeAssertion = new TimeAssertion();
 		var latestUpdate = new DeviceCheckInDto.Query(new TestConnectionProvider().get())
 				.getLatest(device.id);
-		var after = LocalDateTime.now().withNano(0);
+		timeAssertion.untilNow();
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
 		Assertions.assertTrue(latestUpdate.device > 0, "id was less than 0");
 		Assertions.assertEquals(device.id, latestUpdate.device, "device id");
 		Assertions.assertEquals(100, latestUpdate.battery, "battery");
-		Assertions.assertTrue(before.isBefore(latestUpdate.time) || before.isEqual(latestUpdate.time), "Time of update was too soon");
-		Assertions.assertTrue(after.isAfter(latestUpdate.time) || after.isEqual(latestUpdate.time), "Time of update was too late");
+		timeAssertion.assertCurrentTimeIgnoringNanos(latestUpdate.time);
 	}
 
 	@Test
@@ -109,7 +124,14 @@ public class DeviceCheckInTest
 		);
 	}
 
-	private int doCheckIn(long deviceId, int battery, LocalDateTime time, String hash)
+	private ZonedDateTime getTimeInDeviceTimeZone(int offsetSeconds)
+	{
+		return ZonedDateTime
+				.now(device.timeZone.toZoneId())
+				.plusSeconds(offsetSeconds);
+	}
+
+	private HttpResponse<String> doCheckIn(long deviceId, int battery, ZonedDateTime time, String hash)
 	{
 		try
 		{
@@ -128,15 +150,14 @@ public class DeviceCheckInTest
 		}
 	}
 
-	private int doCheckIn(URI uri)
+	private HttpResponse<String> doCheckIn(URI uri)
 	{
 		try
 		{
 			var request = HttpRequest.newBuilder(uri).build();
 
-			return HttpClient.newHttpClient()
-					.send(request, HttpResponse.BodyHandlers.ofString())
-					.statusCode();
+			 return HttpClient.newHttpClient()
+					.send(request, HttpResponse.BodyHandlers.ofString());
 		}
 		catch (InterruptedException | IOException e)
 		{

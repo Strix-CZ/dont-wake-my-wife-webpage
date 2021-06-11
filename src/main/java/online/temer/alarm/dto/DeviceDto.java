@@ -35,6 +35,11 @@ public class DeviceDto
 
 	public static DeviceDto generateDevice()
 	{
+		return generateDevice(TimeZone.getDefault());
+	}
+
+	public static DeviceDto generateDevice(TimeZone timeZone)
+	{
 		String possibleLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
 
 		String secretKey = new SecureRandom().ints()
@@ -44,7 +49,7 @@ public class DeviceDto
 
 		return new DeviceDto(
 				LocalDateTime.now(),
-				TimeZone.getDefault(),
+				timeZone,
 				secretKey
 		);
 	}
