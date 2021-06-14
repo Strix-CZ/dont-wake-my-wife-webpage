@@ -48,6 +48,5 @@ public abstract class Handler
 		public int getCode() {
 			return code;
 		}
-
 	}
 }

@@ -1,6 +1,5 @@
 package online.temer.alarm.server;
 
-import io.undertow.server.HttpServerExchange;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceDto;
@@ -47,16 +46,12 @@ public class CheckInHandler extends Handler
 			return new Response(400);
 		}
 
-		long timeOfRequest = time.get().toEpochSecond();
-		long now = ZonedDateTime.now(deviceDto.timeZone.toZoneId()).toEpochSecond();
-
-		if (Math.abs(timeOfRequest - now) > 10)
+		if (!isCorrectTimeOfRequest(deviceDto.timeZone, time.get()))
 		{
 			return new Response(422, formatCurrentTime(deviceDto.timeZone));
 		}
 
 		String computedHash = calculateHash(deviceId.get(), time.get().toLocalDateTime(), battery.get(), deviceDto.secretKey);
-
 		if (!computedHash.equals(hash.get()))
 		{
 			return new Response(401, formatCurrentTime(deviceDto.timeZone));
@@ -70,6 +65,11 @@ public class CheckInHandler extends Handler
 
 		return new Response(formatCurrentTime(deviceDto.timeZone) + "\n"
 				+ formatAlarm(alarm) + "\n");
+	}
+
+	private boolean isCorrectTimeOfRequest(TimeZone timeZoneOfDevice, ZonedDateTime timeOfRequest) {
+		long nowInTimeZoneOfDevice = ZonedDateTime.now(timeZoneOfDevice.toZoneId()).toEpochSecond();
+		return Math.abs(timeOfRequest.toEpochSecond() - nowInTimeZoneOfDevice) <= 10;
 	}
 
 	private String formatAlarm(AlarmDto alarm) {
