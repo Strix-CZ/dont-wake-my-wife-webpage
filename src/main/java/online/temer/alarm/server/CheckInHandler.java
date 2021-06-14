@@ -26,30 +26,14 @@ public class CheckInHandler extends Handler
 		int battery = parameterReader.readInt("battery");
 		String hash = parameterReader.readString("hash");
 
-		DeviceDto deviceDto = new DeviceDto.Query(connection)
-				.get(deviceId);
-
-		if (deviceDto == null)
-		{
-			return new Response(400);
-		}
+		DeviceDto deviceDto = findDevice(deviceId);
 
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
 
-		if (!isCorrectTimeOfRequest(deviceDto.timeZone, time))
-		{
-			return new Response(422, formatCurrentTime(deviceDto.timeZone));
-		}
+		validateTimeOfRequest(deviceDto, time);
+		validateHash(deviceId, battery, hash, deviceDto, time);
 
-		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), battery, deviceDto.secretKey);
-		if (!computedHash.equals(hash))
-		{
-			return new Response(401, formatCurrentTime(deviceDto.timeZone));
-		}
-
-		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
-		new DeviceCheckInDto.Query(connection)
-				.insertUpdate(deviceCheckInDto);
+		logCheckIn(deviceId, battery);
 
 		AlarmDto alarm = new AlarmDto.Query(connection).get(deviceDto.id);
 
@@ -57,9 +41,38 @@ public class CheckInHandler extends Handler
 				+ formatAlarm(alarm) + "\n");
 	}
 
-	private boolean isCorrectTimeOfRequest(TimeZone timeZoneOfDevice, ZonedDateTime timeOfRequest) {
-		long nowInTimeZoneOfDevice = ZonedDateTime.now(timeZoneOfDevice.toZoneId()).toEpochSecond();
-		return Math.abs(timeOfRequest.toEpochSecond() - nowInTimeZoneOfDevice) <= 10;
+	private DeviceDto findDevice(long deviceId) {
+		DeviceDto deviceDto = new DeviceDto.Query(connection).get(deviceId);
+
+		if (deviceDto == null)
+		{
+			throw new IncorrectRequest(400, "unknown device");
+		}
+
+		return deviceDto;
+	}
+
+	private void validateHash(long deviceId, int battery, String hash, DeviceDto deviceDto, ZonedDateTime time) {
+		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), battery, deviceDto.secretKey);
+		if (!computedHash.equals(hash))
+		{
+			throw new IncorrectRequest(401, formatCurrentTime(deviceDto.timeZone));
+		}
+	}
+
+	private void validateTimeOfRequest(DeviceDto deviceDto, ZonedDateTime time) {
+		long nowInTimeZoneOfDevice = ZonedDateTime.now(deviceDto.timeZone.toZoneId()).toEpochSecond();
+		if (Math.abs(time.toEpochSecond() - nowInTimeZoneOfDevice) > 10)
+		{
+			throw new IncorrectRequest(422, formatCurrentTime(deviceDto.timeZone));
+		}
+	}
+
+	private void logCheckIn(long deviceId, int battery)
+	{
+		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
+		new DeviceCheckInDto.Query(connection)
+				.insertUpdate(deviceCheckInDto);
 	}
 
 	private String formatAlarm(AlarmDto alarm) {
