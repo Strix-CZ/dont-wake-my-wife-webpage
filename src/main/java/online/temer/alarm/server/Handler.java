@@ -10,7 +10,16 @@ public abstract class Handler
 	public void handle(HttpServerExchange exchange)
 	{
 		var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
-		var response = handle(parameterReader);
+		Response response;
+		try
+		{
+			response = handle(parameterReader);
+		}
+		catch (IncorrectRequest e)
+		{
+			response = e.response;
+		}
+
 
 		exchange.setStatusCode(response.getCode());
 		exchange.getResponseSender().send(response.getBody());

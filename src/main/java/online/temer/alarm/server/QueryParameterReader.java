@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Deque;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TimeZone;
 
 public class QueryParameterReader
@@ -17,47 +16,33 @@ public class QueryParameterReader
 		this.parameters = parameters;
 	}
 
-	public boolean hasParameter(String name)
-	{
-		Optional<String> parameter = readString(name);
-		if (parameter.isEmpty())
-		{
-			return false;
-		}
-
-		return !parameter.get().isEmpty();
-	}
-
-	public Optional<String> readString(String name)
+	public String readString(String name)
 	{
 		var deque = parameters.get(name);
 
-		if (deque == null)
-			return Optional.empty();
+		if (deque == null || deque.isEmpty())
+			throw new IncorrectParameter(name);
 
-		if (deque.isEmpty())
-			return Optional.empty();
+		String parameter = deque.peekFirst();
+		if (parameter == null)
+			throw new IncorrectParameter(name);
 
-		return Optional.of(deque.peekFirst());
+		return parameter;
 	}
 
-	public Optional<Long> readLong(String name)
+	public long readLong(String name)
 	{
-		return readString(name)
-				.map(Long::parseLong);
+		return Long.parseLong(readString(name));
 	}
 
-	public Optional<Integer> readInt(String name)
+	public int readInt(String name)
 	{
-		return readString(name)
-				.map(Integer::parseInt);
+		return Integer.parseInt(readString(name));
 	}
 
-	public Optional<ZonedDateTime> readTime(String name, TimeZone timeZone)
+	public ZonedDateTime readTime(String name, TimeZone timeZone)
 	{
-		return readString(name)
-				.map(timeString -> LocalDateTime
-						.parse(timeString, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-						.atZone(timeZone.toZoneId()));
+		return LocalDateTime.parse(readString(name), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+				.atZone(timeZone.toZoneId());
 	}
 }
