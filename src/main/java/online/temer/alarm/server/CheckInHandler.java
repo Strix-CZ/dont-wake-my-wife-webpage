@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.TimeZone;
 
-public class CheckInHandler
+public class CheckInHandler extends Handler
 {
 	private final Connection connection;
 
@@ -22,19 +22,15 @@ public class CheckInHandler
 		this.connection = connection;
 	}
 
-	public void handle(HttpServerExchange exchange)
+	public Response handle(QueryParameterReader parameterReader)
 	{
-		var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
-
 		Optional<Long> deviceId = parameterReader.readLong("device");
 		Optional<Integer> battery = parameterReader.readInt("battery");
 		Optional<String> hash = parameterReader.readString("hash");
 
 		if (deviceId.isEmpty() || !parameterReader.hasParameter("time") || battery.isEmpty() || hash.isEmpty())
 		{
-			exchange.setStatusCode(400);
-			exchange.endExchange();
-			return;
+			return new Response(400);
 		}
 
 		DeviceDto deviceDto = new DeviceDto.Query(connection)
@@ -42,17 +38,13 @@ public class CheckInHandler
 
 		if (deviceDto == null)
 		{
-			exchange.setStatusCode(400);
-			exchange.endExchange();
-			return;
+			return new Response(400);
 		}
 
 		Optional<ZonedDateTime> time = parameterReader.readTime("time", deviceDto.timeZone);
 		if (time.isEmpty())
 		{
-			exchange.setStatusCode(400);
-			exchange.endExchange();
-			return;
+			return new Response(400);
 		}
 
 		long timeOfRequest = time.get().toEpochSecond();
@@ -60,18 +52,14 @@ public class CheckInHandler
 
 		if (Math.abs(timeOfRequest - now) > 10)
 		{
-			exchange.setStatusCode(422);
-			exchange.getResponseSender().send(formatCurrentTime(deviceDto.timeZone));
-			return;
+			return new Response(422, formatCurrentTime(deviceDto.timeZone));
 		}
 
 		String computedHash = calculateHash(deviceId.get(), time.get().toLocalDateTime(), battery.get(), deviceDto.secretKey);
 
 		if (!computedHash.equals(hash.get()))
 		{
-			exchange.setStatusCode(401);
-			exchange.getResponseSender().send(formatCurrentTime(deviceDto.timeZone));
-			return;
+			return new Response(401, formatCurrentTime(deviceDto.timeZone));
 		}
 
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId.get(), LocalDateTime.now(), battery.get());
@@ -80,8 +68,7 @@ public class CheckInHandler
 
 		AlarmDto alarm = new AlarmDto.Query(connection).get(deviceDto.id);
 
-		exchange.getResponseSender().send(
-				formatCurrentTime(deviceDto.timeZone) + "\n"
+		return new Response(formatCurrentTime(deviceDto.timeZone) + "\n"
 				+ formatAlarm(alarm) + "\n");
 	}
 
