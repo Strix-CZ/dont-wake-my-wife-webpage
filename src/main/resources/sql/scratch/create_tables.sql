@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS Alarm;
 DROP TABLE IF EXISTS DeviceCheckIn;
 DROP TABLE IF EXISTS Device;
 
@@ -19,5 +20,14 @@ CREATE OR REPLACE TABLE DeviceCheckIn
 	battery INT      NOT NULL,
 
 	PRIMARY KEY (id),
+	FOREIGN KEY (kDevice) REFERENCES Device (id)
+);
+
+CREATE OR REPLACE TABLE Alarm
+(
+	kDevice BIGINT NOT NULL,
+	time    TIME   NOT NULL,
+
+	PRIMARY KEY (kDevice),
 	FOREIGN KEY (kDevice) REFERENCES Device (id)
 );

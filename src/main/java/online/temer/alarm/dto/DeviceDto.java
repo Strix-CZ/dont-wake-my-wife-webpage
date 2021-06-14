@@ -63,6 +63,12 @@ public class DeviceDto
 			this.connection = connection;
 		}
 
+		public DeviceDto generateSaveAndLoadDevice()
+		{
+			long id = insertDevice(generateDevice());
+			return get(id);
+		}
+
 		public long insertDevice(DeviceDto device)
 		{
 			try
