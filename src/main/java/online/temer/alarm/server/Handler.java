@@ -9,16 +9,10 @@ public abstract class Handler
 {
 	public void handle(HttpServerExchange exchange)
 	{
-		Response response;
+		var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
+		var response = handle(parameterReader);
 
-		try {
-			var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
-			response = handle(parameterReader);
-		} catch (ValidationException e) {
-			response = e.response;
-		}
-
-		exchange.setStatusCode(response.code);
+		exchange.setStatusCode(response.getCode());
 		exchange.getResponseSender().send(response.getBody());
 	}
 
@@ -26,8 +20,8 @@ public abstract class Handler
 
 	protected static class Response {
 
-		public final List<String> lines = new LinkedList<>();
-		public final int code;
+		private final List<String> lines = new LinkedList<>();
+		private final int code;
 
 		public Response(int code) {
 			this.code = code;
@@ -55,19 +49,5 @@ public abstract class Handler
 			return code;
 		}
 
-	}
-
-	protected static class ValidationException extends IllegalArgumentException {
-		public final Response response;
-
-		public ValidationException(int code) {
-			super();
-			this.response = new Response(code);
-		}
-
-		public ValidationException(int code, String message) {
-			super(message);
-			this.response = new Response(code, message);
-		}
 	}
 }
