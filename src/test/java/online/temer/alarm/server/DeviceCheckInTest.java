@@ -2,6 +2,7 @@ package online.temer.alarm.server;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
+import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.test.util.TimeAssertion;
@@ -19,6 +20,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -80,7 +82,7 @@ public class DeviceCheckInTest
 
 		Assertions.assertEquals(422, response.statusCode());
 
-		LocalDateTime sentTime = LocalDateTime.parse(response.body().trim(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		LocalDateTime sentTime = LocalDateTime.parse(getLine(response.body(), 0), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		timeAssertion.assertCurrentTimeIgnoringNanos(sentTime, device.timeZone);
 	}
 
@@ -94,23 +96,39 @@ public class DeviceCheckInTest
 	@Test
 	public void checkIn_storesBattery()
 	{
-		ZonedDateTime time = getTimeInDeviceTimeZone(0);
-		String hash = CheckInHandler.calculateHash(device.id, time.toLocalDateTime(), 100, device.secretKey);
-
-		var response = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(0), hash);
+		TimeAssertion timeAssertion = new TimeAssertion();
+		HttpResponse<String> response = doCheckIn();
+		timeAssertion.untilNow();
 
 		Assertions.assertEquals(200, response.statusCode());
 
-		TimeAssertion timeAssertion = new TimeAssertion();
 		var latestUpdate = new DeviceCheckInDto.Query(new TestConnectionProvider().get())
 				.getLatest(device.id);
-		timeAssertion.untilNow();
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
 		Assertions.assertTrue(latestUpdate.device > 0, "id was less than 0");
 		Assertions.assertEquals(device.id, latestUpdate.device, "device id");
 		Assertions.assertEquals(100, latestUpdate.battery, "battery");
 		timeAssertion.assertCurrentTimeIgnoringNanos(latestUpdate.time);
+	}
+
+	@Test
+	public void noAlarmSet_checkInSendsNoAlarm()
+    {
+		var response = doCheckIn();
+		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
+		Assertions.assertEquals("none", getLine(response.body(), 1), "the last line should say none");
+	}
+
+	@Test
+	public void alarmSet_checkInSendsIt()
+	{
+		new AlarmDto.Query(new TestConnectionProvider().get())
+				.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
+		var response = doCheckIn();
+
+		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
+		Assertions.assertEquals("23:06:00", getLine(response.body(), 1));
 	}
 
 	@Test
@@ -121,6 +139,25 @@ public class DeviceCheckInTest
 				"7a8d58cf21ba43cb0dbc63ae8413f1a70423bf7fce8b71015a9442eee8ca5672",
 				CheckInHandler.calculateHash(18L, LocalDateTime.of(2021, 2, 27, 23, 1, 59), 540, "secret")
 		);
+	}
+
+	private HttpResponse<String> doCheckIn()
+	{
+		ZonedDateTime time = getTimeInDeviceTimeZone(0);
+		String hash = CheckInHandler.calculateHash(device.id, time.toLocalDateTime(), 100, device.secretKey);
+
+		return doCheckIn(device.id, 100, time, hash);
+	}
+
+	private String getLine(String text, int lineNumber)
+	{
+		String[] lines = text.split("\n");
+		if (lineNumber >= lines.length)
+		{
+			Assertions.fail("There was no line with number " + lineNumber + " (zero based). Full text:\n\"" + text + "\"");
+		}
+
+		return lines[lineNumber];
 	}
 
 	private ZonedDateTime getTimeInDeviceTimeZone(int offsetSeconds)

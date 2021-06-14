@@ -1,10 +1,10 @@
 package online.temer.alarm.server;
 
 import io.undertow.server.HttpServerExchange;
+import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.util.Hash;
-import org.wildfly.common.ref.Log_$logger;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -61,8 +61,7 @@ public class CheckInHandler
 		if (Math.abs(timeOfRequest - now) > 10)
 		{
 			exchange.setStatusCode(422);
-			sendCurrentTime(exchange, deviceDto.timeZone);
-			exchange.endExchange();
+			exchange.getResponseSender().send(formatCurrentTime(deviceDto.timeZone));
 			return;
 		}
 
@@ -71,27 +70,37 @@ public class CheckInHandler
 		if (!computedHash.equals(hash.get()))
 		{
 			exchange.setStatusCode(401);
-			sendCurrentTime(exchange, deviceDto.timeZone);
-			exchange.endExchange();
+			exchange.getResponseSender().send(formatCurrentTime(deviceDto.timeZone));
 			return;
 		}
 
-		sendCurrentTime(exchange, deviceDto.timeZone);
-
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId.get(), LocalDateTime.now(), battery.get());
-
 		new DeviceCheckInDto.Query(connection)
 				.insertUpdate(deviceCheckInDto);
+
+		AlarmDto alarm = new AlarmDto.Query(connection).get(deviceDto.id);
+
+		exchange.getResponseSender().send(
+				formatCurrentTime(deviceDto.timeZone) + "\n"
+				+ formatAlarm(alarm) + "\n");
 	}
 
-	private void sendCurrentTime(HttpServerExchange exchange, TimeZone deviceTimeZone)
+	private String formatAlarm(AlarmDto alarm) {
+		if (alarm == null)
+		{
+			return "none";
+		}
+		else
+		{
+			return alarm.time.format(DateTimeFormatter.ISO_LOCAL_TIME);
+		}
+	}
+
+	private String formatCurrentTime(TimeZone deviceTimeZone)
 	{
-		String correctTimeInDeviceTimeZone =
-				ZonedDateTime.now(deviceTimeZone.toZoneId())
+		return ZonedDateTime.now(deviceTimeZone.toZoneId())
 						.withNano(0)
 						.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
-		exchange.getResponseSender().send(correctTimeInDeviceTimeZone + "\n");
 	}
 
 	static String calculateHash(Long deviceId, LocalDateTime time, Integer battery, String secretKey)
