@@ -31,7 +31,7 @@ public class CheckInHandler extends Handler
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
 
 		validateTimeOfRequest(deviceDto, time);
-		validateHash(deviceId, battery, hash, deviceDto, time);
+		validateHash(deviceId, hash, deviceDto, time);
 
 		logCheckIn(deviceId, battery);
 
@@ -52,8 +52,8 @@ public class CheckInHandler extends Handler
 		return deviceDto;
 	}
 
-	private void validateHash(long deviceId, int battery, String hash, DeviceDto deviceDto, ZonedDateTime time) {
-		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), battery, deviceDto.secretKey);
+	private void validateHash(long deviceId, String hash, DeviceDto deviceDto, ZonedDateTime time) {
+		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), deviceDto.secretKey);
 		if (!computedHash.equals(hash))
 		{
 			throw new IncorrectRequest(401, formatCurrentTime(deviceDto.timeZone));
@@ -93,14 +93,12 @@ public class CheckInHandler extends Handler
 						.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
-	static String calculateHash(Long deviceId, LocalDateTime time, Integer battery, String secretKey)
+	static String calculateHash(Long deviceId, LocalDateTime time, String secretKey)
 	{
 		return new Hash()
 				.addToMessage(deviceId)
 				.addToMessage(" ")
 				.addToMessage(time.withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-				.addToMessage(" ")
-				.addToMessage(battery)
 				.calculateHmac(secretKey);
 	}
 }
