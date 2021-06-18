@@ -1,31 +1,41 @@
 package online.temer.alarm.server;
 
+import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import online.temer.alarm.db.ConnectionProvider;
 
+import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Handler
+public abstract class Handler implements HttpHandler
 {
-	public void handle(HttpServerExchange exchange)
+	private final ConnectionProvider connectionProvider;
+
+	public Handler(ConnectionProvider connectionProvider)
+	{
+		this.connectionProvider = connectionProvider;
+	}
+
+	@Override
+	public void handleRequest(HttpServerExchange exchange)
 	{
 		var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
 		Response response;
 		try
 		{
-			response = handle(parameterReader);
+			response = handle(parameterReader, connectionProvider.get());
 		}
 		catch (IncorrectRequest e)
 		{
 			response = e.response;
 		}
 
-
 		exchange.setStatusCode(response.getCode());
 		exchange.getResponseSender().send(response.getBody());
 	}
 
-	protected abstract Response handle(QueryParameterReader parameterReader);
+	protected abstract Response handle(QueryParameterReader parameterReader, Connection connection);
 
 	protected static class Response {
 

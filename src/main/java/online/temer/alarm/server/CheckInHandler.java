@@ -1,5 +1,6 @@
 package online.temer.alarm.server;
 
+import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceDto;
@@ -13,27 +14,25 @@ import java.util.TimeZone;
 
 public class CheckInHandler extends Handler
 {
-	private final Connection connection;
-
-	public CheckInHandler(Connection connection)
+	public CheckInHandler(ConnectionProvider connectionProvider)
 	{
-		this.connection = connection;
+		super(connectionProvider);
 	}
 
-	public Response handle(QueryParameterReader parameterReader)
+	public Response handle(QueryParameterReader parameterReader, Connection connection)
 	{
 		long deviceId = parameterReader.readLong("device");
 		int battery = parameterReader.readInt("battery");
 		String hash = parameterReader.readString("hash");
 
-		DeviceDto deviceDto = findDevice(deviceId);
+		DeviceDto deviceDto = findDevice(connection, deviceId);
 
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
 
 		validateTimeOfRequest(deviceDto, time);
 		validateHash(deviceId, hash, deviceDto, time);
 
-		logCheckIn(deviceId, battery);
+		logCheckIn(connection, deviceId, battery);
 
 		AlarmDto alarm = new AlarmDto.Query(connection).get(deviceDto.id);
 
@@ -41,7 +40,7 @@ public class CheckInHandler extends Handler
 				+ formatAlarm(alarm) + "\n");
 	}
 
-	private DeviceDto findDevice(long deviceId) {
+	private DeviceDto findDevice(Connection connection, long deviceId) {
 		DeviceDto deviceDto = new DeviceDto.Query(connection).get(deviceId);
 
 		if (deviceDto == null)
@@ -68,7 +67,7 @@ public class CheckInHandler extends Handler
 		}
 	}
 
-	private void logCheckIn(long deviceId, int battery)
+	private void logCheckIn(Connection connection, long deviceId, int battery)
 	{
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
 		new DeviceCheckInDto.Query(connection)

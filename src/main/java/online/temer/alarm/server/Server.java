@@ -30,7 +30,7 @@ public class Server
 		return Undertow.builder()
 				.addHttpListener(port, host)
 				.setHandler(Handlers.path().addExactPath(
-						"/checkin", e -> new CheckInHandler(connectionProvider.get()).handle(e)))
+						"/checkin", new CheckInHandler(connectionProvider)))
 				.build();
 	}
 }
