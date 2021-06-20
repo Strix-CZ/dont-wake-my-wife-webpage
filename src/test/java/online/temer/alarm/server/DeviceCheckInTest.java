@@ -137,14 +137,14 @@ public class DeviceCheckInTest
 		// The hashed message should be "18 2021-02-27T23:01:59"
 		Assertions.assertEquals(
 				"8d58d7d2ca69ac0b522e0096b765ada4c155f70cfdab741f0f4ee2da7dc51576",
-				CheckInHandler.calculateHash(18L, LocalDateTime.of(2021, 2, 27, 23, 1, 59), "secret")
+				DeviceAuthentication.calculateHash(18L, LocalDateTime.of(2021, 2, 27, 23, 1, 59), "secret")
 		);
 	}
 
 	private HttpResponse<String> doCheckIn()
 	{
 		ZonedDateTime time = getTimeInDeviceTimeZone(0);
-		String hash = CheckInHandler.calculateHash(device.id, time.toLocalDateTime(), device.secretKey);
+		String hash = DeviceAuthentication.calculateHash(device.id, time.toLocalDateTime(), device.secretKey);
 
 		return doCheckIn(device.id, 100, time, hash);
 	}
