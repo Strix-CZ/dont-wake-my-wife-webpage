@@ -12,12 +12,14 @@ public class CheckInHandler extends Handler
 {
 	private final DeviceAuthentication deviceAuthentication;
 	private final AlarmQuery alarmQuery;
+	private final DeviceCheckInQuery deviceCheckInQuery;
 
-	public CheckInHandler(DeviceAuthentication deviceAuthentication, AlarmQuery alarmQuery, ConnectionProvider connectionProvider)
+	public CheckInHandler(DeviceAuthentication deviceAuthentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider)
 	{
 		super(connectionProvider);
 		this.deviceAuthentication = deviceAuthentication;
 		this.alarmQuery = alarmQuery;
+		this.deviceCheckInQuery = deviceCheckInQuery;
 	}
 
 	public Response handle(QueryParameterReader parameterReader, Connection connection)
@@ -36,8 +38,7 @@ public class CheckInHandler extends Handler
 	private void logCheckIn(Connection connection, long deviceId, int battery)
 	{
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
-		new DeviceCheckInQuery()
-				.insertUpdate(connection, deviceCheckInDto);
+		deviceCheckInQuery.insertUpdate(connection, deviceCheckInDto);
 	}
 
 	private String formatAlarm(AlarmDto alarm) {
