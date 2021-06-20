@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ExtendWith(DbTestExtension.class)
 class DeviceCheckInDtoTest
 {
-	private DeviceCheckInDto.Query query;
+	private DeviceCheckInQuery query;
 	private DeviceDto.Query deviceQuery;
 	private long deviceId;
 
@@ -21,7 +21,7 @@ class DeviceCheckInDtoTest
 	void setUp()
 	{
 		Connection connection = new TestConnectionProvider().get();
-		query = new DeviceCheckInDto.Query(connection);
+		query = new DeviceCheckInQuery(connection);
 		deviceQuery = new DeviceDto.Query(connection);
 
 		deviceId = deviceQuery.insertDevice(DeviceDto.generateDevice());

@@ -3,6 +3,7 @@ package online.temer.alarm.server;
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInDto;
+import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.util.DateTimeUtil;
 
@@ -33,7 +34,7 @@ public class CheckInHandler extends Handler
 	private void logCheckIn(Connection connection, long deviceId, int battery)
 	{
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
-		new DeviceCheckInDto.Query(connection)
+		new DeviceCheckInQuery(connection)
 				.insertUpdate(deviceCheckInDto);
 	}
 

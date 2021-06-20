@@ -3,7 +3,7 @@ package online.temer.alarm.server;
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
-import online.temer.alarm.dto.DeviceCheckInDto;
+import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
@@ -102,7 +102,7 @@ public class DeviceCheckInTest
 
 		Assertions.assertEquals(200, response.statusCode());
 
-		var latestUpdate = new DeviceCheckInDto.Query(new TestConnectionProvider().get())
+		var latestUpdate = new DeviceCheckInQuery(new TestConnectionProvider().get())
 				.getLatest(device.id);
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
