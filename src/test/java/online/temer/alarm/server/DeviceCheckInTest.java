@@ -2,10 +2,7 @@ package online.temer.alarm.server;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
-import online.temer.alarm.dto.AlarmDto;
-import online.temer.alarm.dto.DeviceCheckInQuery;
-import online.temer.alarm.dto.DeviceDto;
-import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.*;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -127,7 +124,7 @@ public class DeviceCheckInTest
 	@Test
 	public void alarmSet_checkInSendsIt()
 	{
-		new AlarmDto.Query(new TestConnectionProvider().get())
+		new AlarmQuery(new TestConnectionProvider().get())
 				.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
 		var response = doCheckIn();
 

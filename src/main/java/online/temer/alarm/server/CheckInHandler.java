@@ -1,10 +1,7 @@
 package online.temer.alarm.server;
 
 import online.temer.alarm.db.ConnectionProvider;
-import online.temer.alarm.dto.AlarmDto;
-import online.temer.alarm.dto.DeviceCheckInDto;
-import online.temer.alarm.dto.DeviceCheckInQuery;
-import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.*;
 import online.temer.alarm.util.DateTimeUtil;
 
 import java.sql.Connection;
@@ -28,7 +25,7 @@ public class CheckInHandler extends Handler
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);
 
-		AlarmDto alarm = new AlarmDto.Query(connection).get(device.id);
+		AlarmDto alarm = new AlarmQuery(connection).get(device.id);
 
 		return new Response(DateTimeUtil.formatCurrentTime(device.timeZone) + "\n"
 				+ formatAlarm(alarm) + "\n");

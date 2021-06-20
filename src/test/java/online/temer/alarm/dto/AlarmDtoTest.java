@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @ExtendWith(DbTestExtension.class)
 class AlarmDtoTest
 {
-	private AlarmDto.Query query;
+	private AlarmQuery query;
 	private DeviceDto device;
 	private Connection connection;
 
@@ -22,7 +22,7 @@ class AlarmDtoTest
 	{
 		connection = new TestConnectionProvider().get();
 		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
-		query = new AlarmDto.Query(connection);
+		query = new AlarmQuery(connection);
 	}
 
 	@Test
