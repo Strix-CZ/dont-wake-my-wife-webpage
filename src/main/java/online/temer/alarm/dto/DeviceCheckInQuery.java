@@ -27,7 +27,7 @@ public class DeviceCheckInQuery {
 		}
 	}
 
-	public void insertUpdate(DeviceCheckInDto update) {
+	public void insertUpdate(Connection connection, DeviceCheckInDto update) {
 		try {
 			new QueryRunner().update(connection,
 					"INSERT INTO DeviceCheckIn(kDevice, time, battery) " +

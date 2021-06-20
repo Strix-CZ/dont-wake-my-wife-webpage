@@ -35,7 +35,7 @@ public class CheckInHandler extends Handler
 	{
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
 		new DeviceCheckInQuery(connection)
-				.insertUpdate(deviceCheckInDto);
+				.insertUpdate(connection, deviceCheckInDto);
 	}
 
 	private String formatAlarm(AlarmDto alarm) {

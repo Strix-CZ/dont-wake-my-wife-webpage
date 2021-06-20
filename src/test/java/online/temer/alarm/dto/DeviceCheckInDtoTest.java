@@ -38,7 +38,7 @@ class DeviceCheckInDtoTest
 	void whenSingleUpdate_returnsIt()
 	{
 		LocalDateTime time = LocalDateTime.now().withNano(0);
-		query.insertUpdate(new DeviceCheckInDto(deviceId, time, 100));
+		query.insertUpdate(connection, new DeviceCheckInDto(deviceId, time, 100));
 
 		var deviceCheckInDto = query.getLatest(connection, deviceId);
 
@@ -52,8 +52,8 @@ class DeviceCheckInDtoTest
 	@Test
 	void whenMultipleUpdates_latestIsReturned()
 	{
-		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
-		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 90));
+		query.insertUpdate(connection, new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
+		query.insertUpdate(connection, new DeviceCheckInDto(deviceId, LocalDateTime.now(), 90));
 
 		var checkIn = query.getLatest(connection, deviceId);
 		Assertions.assertEquals(90, checkIn.battery, "battery");
@@ -62,10 +62,10 @@ class DeviceCheckInDtoTest
 	@Test
 	void whenMultipleDevicesUpdates_latestOfTheDeviceIsReturned()
 	{
-		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
+		query.insertUpdate(connection, new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
 
 		long deviceId2 = deviceQuery.insertDevice(DeviceDto.generateDevice());
-		query.insertUpdate(new DeviceCheckInDto(deviceId2, LocalDateTime.now(), 50));
+		query.insertUpdate(connection, new DeviceCheckInDto(deviceId2, LocalDateTime.now(), 50));
 
 		Assertions.assertEquals(100, query.getLatest(connection, deviceId).battery, "battery of first device is 100");
 		Assertions.assertEquals(50, query.getLatest(connection, deviceId2).battery, "battery of second device is 50");
