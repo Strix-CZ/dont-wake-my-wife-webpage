@@ -11,15 +11,10 @@ import java.time.ZoneId;
 import java.util.TimeZone;
 
 public class DeviceQuery {
-	private final Connection connection;
-
-	public DeviceQuery(Connection connection) {
-		this.connection = connection;
-	}
 
 	public DeviceDto generateSaveAndLoadDevice(Connection connection) {
-		long id = insertDevice(this.connection, DeviceDto.generateDevice());
-		return get(this.connection, id);
+		long id = insertDevice(connection, DeviceDto.generateDevice());
+		return get(connection, id);
 	}
 
 	public long insertDevice(Connection connection, DeviceDto device) {

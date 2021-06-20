@@ -23,7 +23,7 @@ class DeviceCheckInDtoTest
 	{
 		connection = new TestConnectionProvider().get();
 		query = new DeviceCheckInQuery();
-		deviceQuery = new DeviceQuery(connection);
+		deviceQuery = new DeviceQuery();
 
 		deviceId = deviceQuery.insertDevice(connection, DeviceDto.generateDevice());
 	}

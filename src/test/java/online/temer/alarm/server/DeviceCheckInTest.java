@@ -44,7 +44,7 @@ public class DeviceCheckInTest
 		server = new Server(8765, "localhost", testConnectionProvider);
 		server.start();
 
-		var query = new DeviceQuery(connection);
+		var query = new DeviceQuery();
 
 		long id = query.insertDevice(
 				connection, DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));

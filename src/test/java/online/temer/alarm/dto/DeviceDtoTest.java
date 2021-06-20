@@ -22,7 +22,7 @@ class DeviceDtoTest
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		query = new DeviceQuery(connection);
+		query = new DeviceQuery();
 	}
 
 	@Test

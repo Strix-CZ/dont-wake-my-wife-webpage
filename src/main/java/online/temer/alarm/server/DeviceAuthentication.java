@@ -28,7 +28,7 @@ public class DeviceAuthentication
 	}
 
 	private DeviceDto findDevice(long deviceId, Connection connection) {
-		DeviceDto deviceDto = new DeviceQuery(connection).get(connection, deviceId);
+		DeviceDto deviceDto = new DeviceQuery().get(connection, deviceId);
 
 		if (deviceDto == null)
 		{

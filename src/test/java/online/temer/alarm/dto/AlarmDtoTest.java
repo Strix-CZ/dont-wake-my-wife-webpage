@@ -21,7 +21,7 @@ class AlarmDtoTest
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		device = new DeviceQuery(connection).generateSaveAndLoadDevice(connection);
+		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
 		query = new AlarmDto.Query(connection);
 	}
 
