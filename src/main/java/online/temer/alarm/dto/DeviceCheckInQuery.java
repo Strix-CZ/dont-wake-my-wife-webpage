@@ -8,11 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DeviceCheckInQuery {
-	private final Connection connection;
-
-	public DeviceCheckInQuery(Connection connection) {
-		this.connection = connection;
-	}
 
 	public DeviceCheckInDto getLatest(Connection connection, long device) {
 		try {

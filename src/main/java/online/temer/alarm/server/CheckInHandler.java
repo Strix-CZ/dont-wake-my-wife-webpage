@@ -34,7 +34,7 @@ public class CheckInHandler extends Handler
 	private void logCheckIn(Connection connection, long deviceId, int battery)
 	{
 		var deviceCheckInDto = new DeviceCheckInDto(deviceId, LocalDateTime.now(), battery);
-		new DeviceCheckInQuery(connection)
+		new DeviceCheckInQuery()
 				.insertUpdate(connection, deviceCheckInDto);
 	}
 

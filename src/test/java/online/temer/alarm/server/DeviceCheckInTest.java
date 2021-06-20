@@ -105,7 +105,7 @@ public class DeviceCheckInTest
 
 		Assertions.assertEquals(200, response.statusCode());
 
-		var latestUpdate = new DeviceCheckInQuery(new TestConnectionProvider().get())
+		var latestUpdate = new DeviceCheckInQuery()
 				.getLatest(connection, device.id);
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
