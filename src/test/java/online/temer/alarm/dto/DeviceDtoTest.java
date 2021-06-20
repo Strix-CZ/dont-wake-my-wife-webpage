@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.TimeZone;
@@ -15,11 +16,13 @@ import java.util.TimeZone;
 class DeviceDtoTest
 {
 	private DeviceQuery query;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
-		query = new DeviceQuery(new TestConnectionProvider().get());
+		connection = new TestConnectionProvider().get();
+		query = new DeviceQuery(connection);
 	}
 
 	@Test
@@ -33,7 +36,7 @@ class DeviceDtoTest
 	{
 		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/New_York"));
 		LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
-		long id = query.insertDevice(new DeviceDto(timeCreated, timeZone, "secretKey"));
+		long id = query.insertDevice(connection, new DeviceDto(timeCreated, timeZone, "secretKey"));
 		DeviceDto device = query.get(id);
 
 		Assertions.assertNotNull(device, "loadedDevice should not be null");

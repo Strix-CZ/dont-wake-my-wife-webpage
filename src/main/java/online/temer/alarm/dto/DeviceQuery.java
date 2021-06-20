@@ -18,11 +18,11 @@ public class DeviceQuery {
 	}
 
 	public DeviceDto generateSaveAndLoadDevice() {
-		long id = insertDevice(DeviceDto.generateDevice());
+		long id = insertDevice(connection, DeviceDto.generateDevice());
 		return get(id);
 	}
 
-	public long insertDevice(DeviceDto device) {
+	public long insertDevice(Connection connection, DeviceDto device) {
 		try {
 			return new QueryRunner().query(connection,
 					"INSERT INTO Device(timeCreated, timeZone, secretKey) "
