@@ -14,7 +14,7 @@ public class AlarmQuery {
 		this.connection = connection;
 	}
 
-	public void insertOrUpdateAlarm(AlarmDto alarm) {
+	public void insertOrUpdateAlarm(Connection connection, AlarmDto alarm) {
 		try {
 			new QueryRunner().update(connection,
 					"INSERT INTO Alarm(kDevice, time) "

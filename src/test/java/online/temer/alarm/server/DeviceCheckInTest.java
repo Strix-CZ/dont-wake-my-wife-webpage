@@ -125,7 +125,7 @@ public class DeviceCheckInTest
 	public void alarmSet_checkInSendsIt()
 	{
 		new AlarmQuery(new TestConnectionProvider().get())
-				.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
+				.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
 		var response = doCheckIn();
 
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");

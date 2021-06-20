@@ -40,7 +40,7 @@ class AlarmDtoTest
 	@Test
 	void savingAndLoading_returnsSameAlarm()
 	{
-		query.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
+		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
 		AlarmDto alarmDto = query.get(device.id);
 
 		Assertions.assertEquals(device.id, alarmDto.device, "device");
@@ -50,8 +50,8 @@ class AlarmDtoTest
 	@Test
 	void updatingAlarm_overridesExistingAlarm()
 	{
-		query.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(23, 0)));
-		query.insertOrUpdateAlarm(new AlarmDto(device.id, LocalTime.of(5, 30)));
+		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
+		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(5, 30)));
 
 		AlarmDto alarmDto = query.get(device.id);
 		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Alarm was not updated");
