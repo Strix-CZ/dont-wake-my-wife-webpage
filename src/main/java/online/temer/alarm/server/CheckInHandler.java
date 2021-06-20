@@ -11,11 +11,13 @@ import java.time.format.DateTimeFormatter;
 public class CheckInHandler extends Handler
 {
 	private final DeviceAuthentication deviceAuthentication;
+	private final AlarmQuery alarmQuery;
 
-	public CheckInHandler(DeviceAuthentication deviceAuthentication, ConnectionProvider connectionProvider)
+	public CheckInHandler(DeviceAuthentication deviceAuthentication, AlarmQuery alarmQuery, ConnectionProvider connectionProvider)
 	{
 		super(connectionProvider);
 		this.deviceAuthentication = deviceAuthentication;
+		this.alarmQuery = alarmQuery;
 	}
 
 	public Response handle(QueryParameterReader parameterReader, Connection connection)
@@ -25,7 +27,7 @@ public class CheckInHandler extends Handler
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);
 
-		AlarmDto alarm = new AlarmQuery().get(connection, device.id);
+		AlarmDto alarm = alarmQuery.get(connection, device.id);
 
 		return new Response(DateTimeUtil.formatCurrentTime(device.timeZone) + "\n"
 				+ formatAlarm(alarm) + "\n");
