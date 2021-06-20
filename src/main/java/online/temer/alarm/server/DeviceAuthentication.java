@@ -12,18 +12,11 @@ import java.time.format.DateTimeFormatter;
 
 public class DeviceAuthentication
 {
-	private final Connection connection;
-
-	public DeviceAuthentication(Connection connection)
-	{
-		this.connection = connection;
-	}
-
-	public DeviceDto authenticate(QueryParameterReader parameterReader)
+	public DeviceDto authenticate(Connection connection, QueryParameterReader parameterReader)
 	{
 		long deviceId = parameterReader.readLong("device");
 
-		DeviceDto deviceDto = findDevice(deviceId);
+		DeviceDto deviceDto = findDevice(deviceId, connection);
 
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
 		String hash = parameterReader.readString("hash");
@@ -34,7 +27,7 @@ public class DeviceAuthentication
 		return deviceDto;
 	}
 
-	private DeviceDto findDevice(long deviceId) {
+	private DeviceDto findDevice(long deviceId, Connection connection) {
 		DeviceDto deviceDto = new DeviceQuery(connection).get(connection, deviceId);
 
 		if (deviceDto == null)
