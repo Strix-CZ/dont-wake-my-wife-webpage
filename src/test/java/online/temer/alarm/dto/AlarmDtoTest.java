@@ -28,20 +28,20 @@ class AlarmDtoTest
 	@Test
 	public void getAlarmOfNonExistentDevice_returnsNull()
 	{
-		Assertions.assertNull(query.get(-1000));
+		Assertions.assertNull(query.get(connection, -1000));
 	}
 
 	@Test
 	public void getNonExistentAlarm_returnsNull()
 	{
-		Assertions.assertNull(query.get(device.id));
+		Assertions.assertNull(query.get(connection, device.id));
 	}
 
 	@Test
 	void savingAndLoading_returnsSameAlarm()
 	{
 		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
-		AlarmDto alarmDto = query.get(device.id);
+		AlarmDto alarmDto = query.get(connection, device.id);
 
 		Assertions.assertEquals(device.id, alarmDto.device, "device");
 		Assertions.assertEquals(LocalTime.of(23, 50, 10), alarmDto.time, "time");
@@ -53,7 +53,7 @@ class AlarmDtoTest
 		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
 		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(5, 30)));
 
-		AlarmDto alarmDto = query.get(device.id);
+		AlarmDto alarmDto = query.get(connection, device.id);
 		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Alarm was not updated");
 	}
 }

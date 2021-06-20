@@ -25,7 +25,7 @@ public class CheckInHandler extends Handler
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);
 
-		AlarmDto alarm = new AlarmQuery(connection).get(device.id);
+		AlarmDto alarm = new AlarmQuery(connection).get(connection, device.id);
 
 		return new Response(DateTimeUtil.formatCurrentTime(device.timeZone) + "\n"
 				+ formatAlarm(alarm) + "\n");

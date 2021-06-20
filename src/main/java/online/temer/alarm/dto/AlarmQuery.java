@@ -27,7 +27,7 @@ public class AlarmQuery {
 		}
 	}
 
-	public AlarmDto get(long device) {
+	public AlarmDto get(Connection connection, long device) {
 		try {
 			return new QueryRunner().query(
 					connection,
