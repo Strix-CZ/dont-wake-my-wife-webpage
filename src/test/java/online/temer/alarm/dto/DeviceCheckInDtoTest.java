@@ -16,11 +16,12 @@ class DeviceCheckInDtoTest
 	private DeviceCheckInQuery query;
 	private DeviceDto.Query deviceQuery;
 	private long deviceId;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
-		Connection connection = new TestConnectionProvider().get();
+		connection = new TestConnectionProvider().get();
 		query = new DeviceCheckInQuery(connection);
 		deviceQuery = new DeviceDto.Query(connection);
 
@@ -30,7 +31,7 @@ class DeviceCheckInDtoTest
 	@Test
 	public void whenNoUpdates_getLatestReturnsNull()
 	{
-		Assertions.assertNull(query.getLatest(1));
+		Assertions.assertNull(query.getLatest(connection, 1));
 	}
 
 	@Test
@@ -39,7 +40,7 @@ class DeviceCheckInDtoTest
 		LocalDateTime time = LocalDateTime.now().withNano(0);
 		query.insertUpdate(new DeviceCheckInDto(deviceId, time, 100));
 
-		var deviceCheckInDto = query.getLatest(deviceId);
+		var deviceCheckInDto = query.getLatest(connection, deviceId);
 
 		Assertions.assertNotNull(deviceCheckInDto, "deviceCheckInDto should not be null");
 		Assertions.assertTrue(deviceCheckInDto.id > 0, "id");
@@ -54,7 +55,7 @@ class DeviceCheckInDtoTest
 		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 100));
 		query.insertUpdate(new DeviceCheckInDto(deviceId, LocalDateTime.now(), 90));
 
-		var checkIn = query.getLatest(deviceId);
+		var checkIn = query.getLatest(connection, deviceId);
 		Assertions.assertEquals(90, checkIn.battery, "battery");
 	}
 
@@ -66,7 +67,7 @@ class DeviceCheckInDtoTest
 		long deviceId2 = deviceQuery.insertDevice(DeviceDto.generateDevice());
 		query.insertUpdate(new DeviceCheckInDto(deviceId2, LocalDateTime.now(), 50));
 
-		Assertions.assertEquals(100, query.getLatest(deviceId).battery, "battery of first device is 100");
-		Assertions.assertEquals(50, query.getLatest(deviceId2).battery, "battery of second device is 50");
+		Assertions.assertEquals(100, query.getLatest(connection, deviceId).battery, "battery of first device is 100");
+		Assertions.assertEquals(50, query.getLatest(connection, deviceId2).battery, "battery of second device is 50");
 	}
 }

@@ -14,7 +14,7 @@ public class DeviceCheckInQuery {
 		this.connection = connection;
 	}
 
-	public DeviceCheckInDto getLatest(long device) {
+	public DeviceCheckInDto getLatest(Connection connection, long device) {
 		try {
 			return new QueryRunner().query(connection,
 					"SELECT id, kDevice device, time, battery " +

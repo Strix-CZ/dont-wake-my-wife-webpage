@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -31,16 +32,18 @@ public class DeviceCheckInTest
 {
 	private Server server;
 	private DeviceDto device;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
 		TestConnectionProvider testConnectionProvider = new TestConnectionProvider();
+		connection = testConnectionProvider.get();
 
 		server = new Server(8765, "localhost", testConnectionProvider);
 		server.start();
 
-		var query = new DeviceDto.Query(testConnectionProvider.get());
+		var query = new DeviceDto.Query(connection);
 
 		long id = query.insertDevice(
 				DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));
@@ -103,7 +106,7 @@ public class DeviceCheckInTest
 		Assertions.assertEquals(200, response.statusCode());
 
 		var latestUpdate = new DeviceCheckInQuery(new TestConnectionProvider().get())
-				.getLatest(device.id);
+				.getLatest(connection, device.id);
 
 		Assertions.assertNotNull(latestUpdate, "The check-in was not stored");
 		Assertions.assertTrue(latestUpdate.device > 0, "id was less than 0");
