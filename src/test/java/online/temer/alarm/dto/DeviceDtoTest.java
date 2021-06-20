@@ -14,12 +14,12 @@ import java.util.TimeZone;
 @ExtendWith(DbTestExtension.class)
 class DeviceDtoTest
 {
-	private DeviceDto.Query query;
+	private DeviceQuery query;
 
 	@BeforeEach
 	void setUp()
 	{
-		query = new DeviceDto.Query(new TestConnectionProvider().get());
+		query = new DeviceQuery(new TestConnectionProvider().get());
 	}
 
 	@Test

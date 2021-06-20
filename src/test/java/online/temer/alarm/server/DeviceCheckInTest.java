@@ -5,6 +5,7 @@ import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +44,7 @@ public class DeviceCheckInTest
 		server = new Server(8765, "localhost", testConnectionProvider);
 		server.start();
 
-		var query = new DeviceDto.Query(connection);
+		var query = new DeviceQuery(connection);
 
 		long id = query.insertDevice(
 				DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 class DeviceCheckInDtoTest
 {
 	private DeviceCheckInQuery query;
-	private DeviceDto.Query deviceQuery;
+	private DeviceQuery deviceQuery;
 	private long deviceId;
 	private Connection connection;
 
@@ -23,7 +23,7 @@ class DeviceCheckInDtoTest
 	{
 		connection = new TestConnectionProvider().get();
 		query = new DeviceCheckInQuery();
-		deviceQuery = new DeviceDto.Query(connection);
+		deviceQuery = new DeviceQuery(connection);
 
 		deviceId = deviceQuery.insertDevice(DeviceDto.generateDevice());
 	}

@@ -1,6 +1,7 @@
 package online.temer.alarm.server;
 
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.util.DateTimeUtil;
 import online.temer.alarm.util.Hash;
 
@@ -11,11 +12,11 @@ import java.time.format.DateTimeFormatter;
 
 public class DeviceAuthentication
 {
-	private final DeviceDto.Query deviceQuery;
+	private final DeviceQuery deviceQuery;
 
 	public DeviceAuthentication(Connection connection)
 	{
-		this.deviceQuery = new DeviceDto.Query(connection);
+		this.deviceQuery = new DeviceQuery(connection);
 	}
 
 	public DeviceDto authenticate(QueryParameterReader parameterReader)

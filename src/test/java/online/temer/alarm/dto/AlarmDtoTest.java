@@ -7,10 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.TimeZone;
 
 @ExtendWith(DbTestExtension.class)
 class AlarmDtoTest
@@ -21,7 +18,7 @@ class AlarmDtoTest
 	@BeforeEach
 	void setUp()
 	{
-		device = new DeviceDto.Query(new TestConnectionProvider().get()).generateSaveAndLoadDevice();
+		device = new DeviceQuery(new TestConnectionProvider().get()).generateSaveAndLoadDevice();
 		query = new AlarmDto.Query(new TestConnectionProvider().get());
 	}
 
