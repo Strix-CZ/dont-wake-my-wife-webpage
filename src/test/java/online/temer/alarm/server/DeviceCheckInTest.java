@@ -124,7 +124,7 @@ public class DeviceCheckInTest
 	@Test
 	public void alarmSet_checkInSendsIt()
 	{
-		new AlarmQuery(new TestConnectionProvider().get())
+		new AlarmQuery()
 				.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
 		var response = doCheckIn();
 

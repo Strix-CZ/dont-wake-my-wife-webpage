@@ -22,7 +22,7 @@ class AlarmDtoTest
 	{
 		connection = new TestConnectionProvider().get();
 		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
-		query = new AlarmQuery(connection);
+		query = new AlarmQuery();
 	}
 
 	@Test

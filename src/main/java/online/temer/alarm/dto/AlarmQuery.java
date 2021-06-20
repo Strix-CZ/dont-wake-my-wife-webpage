@@ -8,12 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class AlarmQuery {
-	private final Connection connection;
-
-	public AlarmQuery(Connection connection) {
-		this.connection = connection;
-	}
-
 	public void insertOrUpdateAlarm(Connection connection, AlarmDto alarm) {
 		try {
 			new QueryRunner().update(connection,
