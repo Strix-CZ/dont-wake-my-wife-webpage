@@ -13,14 +13,17 @@ import java.time.format.DateTimeFormatter;
 
 public class CheckInHandler extends Handler
 {
-	public CheckInHandler(ConnectionProvider connectionProvider)
+	private final DeviceAuthentication deviceAuthentication;
+
+	public CheckInHandler(DeviceAuthentication deviceAuthentication, ConnectionProvider connectionProvider)
 	{
 		super(connectionProvider);
+		this.deviceAuthentication = deviceAuthentication;
 	}
 
 	public Response handle(QueryParameterReader parameterReader, Connection connection)
 	{
-		DeviceDto device = new DeviceAuthentication().authenticate(connection, parameterReader);
+		DeviceDto device = deviceAuthentication.authenticate(connection, parameterReader);
 
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);

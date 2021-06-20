@@ -12,6 +12,12 @@ import java.time.format.DateTimeFormatter;
 
 public class DeviceAuthentication
 {
+	private final DeviceQuery deviceQuery;
+
+	public DeviceAuthentication(DeviceQuery deviceQuery) {
+		this.deviceQuery = deviceQuery;
+	}
+
 	public DeviceDto authenticate(Connection connection, QueryParameterReader parameterReader)
 	{
 		long deviceId = parameterReader.readLong("device");
@@ -28,7 +34,7 @@ public class DeviceAuthentication
 	}
 
 	private DeviceDto findDevice(long deviceId, Connection connection) {
-		DeviceDto deviceDto = new DeviceQuery().get(connection, deviceId);
+		DeviceDto deviceDto = deviceQuery.get(connection, deviceId);
 
 		if (deviceDto == null)
 		{

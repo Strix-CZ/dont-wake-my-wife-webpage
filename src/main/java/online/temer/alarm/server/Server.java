@@ -8,10 +8,12 @@ public class Server
 {
 	private final Undertow server;
 	private final ConnectionProvider connectionProvider;
+	private final DeviceAuthentication deviceAuthentication;
 
-	public Server(int port, String host, ConnectionProvider connectionProvider)
+	public Server(int port, String host, ConnectionProvider connectionProvider, DeviceAuthentication deviceAuthentication)
 	{
 		this.connectionProvider = connectionProvider;
+		this.deviceAuthentication = deviceAuthentication;
 		server = createServer(port, host);
 	}
 
@@ -30,7 +32,7 @@ public class Server
 		return Undertow.builder()
 				.addHttpListener(port, host)
 				.setHandler(Handlers.path().addExactPath(
-						"/checkin", new CheckInHandler(connectionProvider)))
+						"/checkin", new CheckInHandler(deviceAuthentication, connectionProvider)))
 				.build();
 	}
 }

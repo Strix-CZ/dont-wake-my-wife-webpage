@@ -41,7 +41,7 @@ public class DeviceCheckInTest
 		TestConnectionProvider testConnectionProvider = new TestConnectionProvider();
 		connection = testConnectionProvider.get();
 
-		server = new Server(8765, "localhost", testConnectionProvider);
+		server = new Server(8765, "localhost", testConnectionProvider, new DeviceAuthentication(new DeviceQuery()));
 		server.start();
 
 		var query = new DeviceQuery();
