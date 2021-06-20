@@ -48,7 +48,7 @@ public class DeviceCheckInTest
 
 		long id = query.insertDevice(
 				connection, DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));
-		device = query.get(id);
+		device = query.get(connection, id);
 	}
 
 	@AfterEach

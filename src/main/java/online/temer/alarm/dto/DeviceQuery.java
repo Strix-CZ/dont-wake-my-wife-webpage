@@ -19,7 +19,7 @@ public class DeviceQuery {
 
 	public DeviceDto generateSaveAndLoadDevice() {
 		long id = insertDevice(connection, DeviceDto.generateDevice());
-		return get(id);
+		return get(connection, id);
 	}
 
 	public long insertDevice(Connection connection, DeviceDto device) {
@@ -34,7 +34,7 @@ public class DeviceQuery {
 		}
 	}
 
-	public DeviceDto get(long id) {
+	public DeviceDto get(Connection connection, long id) {
 		try {
 			return new QueryRunner().query(
 					connection,

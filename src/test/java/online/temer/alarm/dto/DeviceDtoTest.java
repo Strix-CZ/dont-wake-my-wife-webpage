@@ -28,7 +28,7 @@ class DeviceDtoTest
 	@Test
 	public void getNonExistentDevice_returnsNull()
 	{
-		Assertions.assertNull(query.get(-1000));
+		Assertions.assertNull(query.get(connection, -1000));
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class DeviceDtoTest
 		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/New_York"));
 		LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
 		long id = query.insertDevice(connection, new DeviceDto(timeCreated, timeZone, "secretKey"));
-		DeviceDto device = query.get(id);
+		DeviceDto device = query.get(connection, id);
 
 		Assertions.assertNotNull(device, "loadedDevice should not be null");
 		Assertions.assertTrue(device.id > 0, "id was less or equal to zero");
