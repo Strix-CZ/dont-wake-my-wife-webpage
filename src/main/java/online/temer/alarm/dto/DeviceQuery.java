@@ -17,9 +17,9 @@ public class DeviceQuery {
 		this.connection = connection;
 	}
 
-	public DeviceDto generateSaveAndLoadDevice() {
-		long id = insertDevice(connection, DeviceDto.generateDevice());
-		return get(connection, id);
+	public DeviceDto generateSaveAndLoadDevice(Connection connection) {
+		long id = insertDevice(this.connection, DeviceDto.generateDevice());
+		return get(this.connection, id);
 	}
 
 	public long insertDevice(Connection connection, DeviceDto device) {

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.sql.Connection;
 import java.time.LocalTime;
 
 @ExtendWith(DbTestExtension.class)
@@ -14,12 +15,14 @@ class AlarmDtoTest
 {
 	private AlarmDto.Query query;
 	private DeviceDto device;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
-		device = new DeviceQuery(new TestConnectionProvider().get()).generateSaveAndLoadDevice();
-		query = new AlarmDto.Query(new TestConnectionProvider().get());
+		connection = new TestConnectionProvider().get();
+		device = new DeviceQuery(connection).generateSaveAndLoadDevice(connection);
+		query = new AlarmDto.Query(connection);
 	}
 
 	@Test
