@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class DeviceAuthentication
 {
@@ -19,48 +20,54 @@ public class DeviceAuthentication
 		this.deviceQuery = deviceQuery;
 	}
 
-	public DeviceDto authenticate(Connection connection, QueryParameterReader parameterReader)
+	public Result authenticate(Connection connection, QueryParameterReader parameterReader)
 	{
 		long deviceId = parameterReader.readLong("device");
 
-		DeviceDto deviceDto = findDevice(deviceId, connection);
+		DeviceDto deviceDto = deviceQuery.get(connection, deviceId);
+		if (deviceDto == null)
+		{
+			return new Result(new Handler.Response(400, "unknown device"));
+		}
 
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
 		String hash = parameterReader.readString("hash");
 
-		validateTimeOfRequest(deviceDto, time);
-		validateHash(deviceId, hash, deviceDto, time);
-
-		return deviceDto;
-	}
-
-	private DeviceDto findDevice(long deviceId, Connection connection)
-	{
-		DeviceDto deviceDto = deviceQuery.get(connection, deviceId);
-
-		if (deviceDto == null)
+		if (!isTimeOfRequestInTolerance(deviceDto, time))
 		{
-			throw new IncorrectRequest(400, "unknown device");
+			return new Result(new Handler.Response(422, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
 		}
 
-		return deviceDto;
-	}
-
-	private void validateHash(long deviceId, String hash, DeviceDto deviceDto, ZonedDateTime time)
-	{
 		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), deviceDto.secretKey);
 		if (!computedHash.equals(hash))
 		{
-			throw new IncorrectRequest(401, DateTimeUtil.formatCurrentTime(deviceDto.timeZone));
+			return new Result(new Handler.Response(401, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
 		}
+
+		return new Result(deviceDto);
 	}
 
-	private void validateTimeOfRequest(DeviceDto deviceDto, ZonedDateTime time)
+	private boolean isTimeOfRequestInTolerance(DeviceDto deviceDto, ZonedDateTime time)
 	{
 		long nowInTimeZoneOfDevice = ZonedDateTime.now(deviceDto.timeZone.toZoneId()).toEpochSecond();
-		if (Math.abs(time.toEpochSecond() - nowInTimeZoneOfDevice) > 10)
+		return Math.abs(time.toEpochSecond() - nowInTimeZoneOfDevice) <= 10;
+	}
+
+	public static class Result
+	{
+		public final Optional<DeviceDto> device;
+		public final Handler.Response errorResponse;
+
+		public Result(DeviceDto device)
 		{
-			throw new IncorrectRequest(422, DateTimeUtil.formatCurrentTime(deviceDto.timeZone));
+			this.device = Optional.of(device);
+			this.errorResponse = null;
+		}
+
+		public Result(Handler.Response errorResponse)
+		{
+			this.device = Optional.empty();
+			this.errorResponse = errorResponse;
 		}
 	}
 

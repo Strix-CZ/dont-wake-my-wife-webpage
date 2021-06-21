@@ -54,9 +54,7 @@ public class DeviceCheckInTest
 
 		var query = new DeviceQuery();
 
-		long id = query.insertDevice(
-				connection, DeviceDto.generateDevice(TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong"))));
-		device = query.get(connection, id);
+		device = query.generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
 	}
 
 	@AfterEach
@@ -76,33 +74,6 @@ public class DeviceCheckInTest
 	{
 		URI uri = new URIBuilder("http://localhost:8765/checkin").build();
 		Assertions.assertEquals(400, doCheckIn(uri).statusCode());
-	}
-
-	@Test
-	void unknownDevice_returns400()
-	{
-		int status = doCheckIn(-1, 100, getTimeInDeviceTimeZone(0), "bla").statusCode();
-		Assertions.assertEquals(400, status);
-	}
-
-	@Test
-	void timeThatIsOff_returns422AndCorrectTime()
-	{
-		TimeAssertion timeAssertion = new TimeAssertion();
-		var response = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(15), "bla");
-		timeAssertion.untilNow();
-
-		Assertions.assertEquals(422, response.statusCode());
-
-		LocalDateTime sentTime = LocalDateTime.parse(getLine(response.body(), 0), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		timeAssertion.assertCurrentTimeIgnoringNanos(sentTime, device.timeZone);
-	}
-
-	@Test
-	void incorrectHash_returns401()
-	{
-		int status = doCheckIn(device.id, 100, getTimeInDeviceTimeZone(0), "bla").statusCode();
-		Assertions.assertEquals(401, status);
 	}
 
 	@Test

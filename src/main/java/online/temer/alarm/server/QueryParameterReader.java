@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -14,6 +16,24 @@ public class QueryParameterReader
 	public QueryParameterReader(Map<String, Deque<String>> parameters)
 	{
 		this.parameters = parameters;
+	}
+
+	public QueryParameterReader(String... keysAndValues)
+	{
+		if (keysAndValues.length % 2 == 1)
+		{
+			throw new IllegalArgumentException("Parameters must be alternating keys and values, but received odd number of parameters.");
+		}
+
+		parameters = new HashMap<>(keysAndValues.length / 2);
+		for (int i = 0; i < keysAndValues.length; i+=2)
+		{
+			String key = keysAndValues[i];
+			String value = keysAndValues[i+1];
+
+			parameters.computeIfAbsent(key, k -> new LinkedList<>())
+					.add(value);
+		}
 	}
 
 	public String readString(String name)

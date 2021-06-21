@@ -28,7 +28,12 @@ public class CheckInHandler extends Handler
 
 	public Response handle(QueryParameterReader parameterReader, Connection connection)
 	{
-		DeviceDto device = deviceAuthentication.authenticate(connection, parameterReader);
+		DeviceAuthentication.Result authenticationResult = deviceAuthentication.authenticate(connection, parameterReader);
+		if (authenticationResult.device.isEmpty())
+		{
+			return authenticationResult.errorResponse;
+		}
+		DeviceDto device = authenticationResult.device.get();
 
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);

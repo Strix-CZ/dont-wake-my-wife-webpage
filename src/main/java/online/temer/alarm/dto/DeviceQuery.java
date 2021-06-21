@@ -14,7 +14,12 @@ public class DeviceQuery
 {
 	public DeviceDto generateSaveAndLoadDevice(Connection connection)
 	{
-		long id = insertDevice(connection, DeviceDto.generateDevice());
+		return generateSaveAndLoadDevice(connection, TimeZone.getDefault());
+	}
+
+	public DeviceDto generateSaveAndLoadDevice(Connection connection, TimeZone timeZone)
+	{
+		long id = insertDevice(connection, DeviceDto.generateDevice(timeZone));
 		return get(connection, id);
 	}
 
