@@ -14,7 +14,8 @@ public class DeviceAuthentication
 {
 	private final DeviceQuery deviceQuery;
 
-	public DeviceAuthentication(DeviceQuery deviceQuery) {
+	public DeviceAuthentication(DeviceQuery deviceQuery)
+	{
 		this.deviceQuery = deviceQuery;
 	}
 
@@ -33,7 +34,8 @@ public class DeviceAuthentication
 		return deviceDto;
 	}
 
-	private DeviceDto findDevice(long deviceId, Connection connection) {
+	private DeviceDto findDevice(long deviceId, Connection connection)
+	{
 		DeviceDto deviceDto = deviceQuery.get(connection, deviceId);
 
 		if (deviceDto == null)

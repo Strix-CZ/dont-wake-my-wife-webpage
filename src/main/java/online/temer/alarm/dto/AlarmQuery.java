@@ -7,29 +7,38 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AlarmQuery {
-	public void insertOrUpdateAlarm(Connection connection, AlarmDto alarm) {
-		try {
+public class AlarmQuery
+{
+	public void insertOrUpdateAlarm(Connection connection, AlarmDto alarm)
+	{
+		try
+		{
 			new QueryRunner().update(connection,
 					"INSERT INTO Alarm(kDevice, time) "
 							+ "VALUES (?, ?) "
 							+ "ON DUPLICATE KEY UPDATE "
 							+ "time = ?",
 					alarm.device, alarm.time, alarm.time);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}
 
-	public AlarmDto get(Connection connection, long device) {
-		try {
+	public AlarmDto get(Connection connection, long device)
+	{
+		try
+		{
 			return new QueryRunner().query(
 					connection,
 					"SELECT kDevice, time "
 							+ "FROM Alarm WHERE kDevice = ?",
 					new Handler(),
 					device);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}

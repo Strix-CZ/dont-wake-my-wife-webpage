@@ -7,28 +7,36 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DeviceCheckInQuery {
-
-	public DeviceCheckInDto getLatest(Connection connection, long device) {
-		try {
+public class DeviceCheckInQuery
+{
+	public DeviceCheckInDto getLatest(Connection connection, long device)
+	{
+		try
+		{
 			return new QueryRunner().query(connection,
 					"SELECT id, kDevice device, time, battery " +
 							"FROM DeviceCheckIn " +
 							"WHERE id = (SELECT MAX(id) FROM DeviceCheckIn WHERE kDevice = ?)",
 					new Handler(),
 					device);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}
 
-	public void insertUpdate(Connection connection, DeviceCheckInDto update) {
-		try {
+	public void insertUpdate(Connection connection, DeviceCheckInDto update)
+	{
+		try
+		{
 			new QueryRunner().update(connection,
 					"INSERT INTO DeviceCheckIn(kDevice, time, battery) " +
 							"VALUES (?, ?, ?)",
 					update.device, update.time, update.battery);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}

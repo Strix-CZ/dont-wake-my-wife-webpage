@@ -1,7 +1,11 @@
 package online.temer.alarm.server;
 
 import online.temer.alarm.db.ConnectionProvider;
-import online.temer.alarm.dto.*;
+import online.temer.alarm.dto.AlarmDto;
+import online.temer.alarm.dto.AlarmQuery;
+import online.temer.alarm.dto.DeviceCheckInDto;
+import online.temer.alarm.dto.DeviceCheckInQuery;
+import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.util.DateTimeUtil;
 
 import java.sql.Connection;
@@ -41,7 +45,8 @@ public class CheckInHandler extends Handler
 		deviceCheckInQuery.insertUpdate(connection, deviceCheckInDto);
 	}
 
-	private String formatAlarm(AlarmDto alarm) {
+	private String formatAlarm(AlarmDto alarm)
+	{
 		if (alarm == null)
 		{
 			return "none";

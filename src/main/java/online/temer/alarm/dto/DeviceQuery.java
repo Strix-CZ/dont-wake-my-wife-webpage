@@ -10,34 +10,43 @@ import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
-public class DeviceQuery {
-
-	public DeviceDto generateSaveAndLoadDevice(Connection connection) {
+public class DeviceQuery
+{
+	public DeviceDto generateSaveAndLoadDevice(Connection connection)
+	{
 		long id = insertDevice(connection, DeviceDto.generateDevice());
 		return get(connection, id);
 	}
 
-	public long insertDevice(Connection connection, DeviceDto device) {
-		try {
+	public long insertDevice(Connection connection, DeviceDto device)
+	{
+		try
+		{
 			return new QueryRunner().query(connection,
 					"INSERT INTO Device(timeCreated, timeZone, secretKey) "
 							+ "VALUES (?, ?, ?) RETURNING id",
 					new ScalarHandler<>(),
 					device.timeCreated, device.timeZone.toZoneId().getId(), device.secretKey);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}
 
-	public DeviceDto get(Connection connection, long id) {
-		try {
+	public DeviceDto get(Connection connection, long id)
+	{
+		try
+		{
 			return new QueryRunner().query(
 					connection,
 					"SELECT id, timeCreated, timeZone, secretKey "
 							+ "FROM Device WHERE id = ?",
 					new Handler(),
 					id);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException(e);
 		}
 	}

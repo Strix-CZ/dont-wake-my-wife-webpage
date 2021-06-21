@@ -37,34 +37,41 @@ public abstract class Handler implements HttpHandler
 
 	protected abstract Response handle(QueryParameterReader parameterReader, Connection connection);
 
-	protected static class Response {
+	protected static class Response
+	{
 
 		private final List<String> lines = new LinkedList<>();
 		private final int code;
 
-		public Response(int code) {
+		public Response(int code)
+		{
 			this.code = code;
 		}
 
-		public Response(int code, String text) {
+		public Response(int code, String text)
+		{
 			this.code = code;
 			lines.add(text);
 		}
 
-		public Response(String text) {
+		public Response(String text)
+		{
 			this.code = 200;
 			lines.add(text);
 		}
 
-		public void addLine(String line) {
+		public void addLine(String line)
+		{
 			lines.add(line);
 		}
 
-		public String getBody() {
+		public String getBody()
+		{
 			return String.join("\n", lines);
 		}
 
-		public int getCode() {
+		public int getCode()
+		{
 			return code;
 		}
 	}

@@ -2,7 +2,11 @@ package online.temer.alarm.server;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
-import online.temer.alarm.dto.*;
+import online.temer.alarm.dto.AlarmDto;
+import online.temer.alarm.dto.AlarmQuery;
+import online.temer.alarm.dto.DeviceCheckInQuery;
+import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -122,7 +126,7 @@ public class DeviceCheckInTest
 
 	@Test
 	public void noAlarmSet_checkInSendsNoAlarm()
-    {
+	{
 		var response = doCheckIn();
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
 		Assertions.assertEquals("none", getLine(response.body(), 1), "the last line should say none");
@@ -200,7 +204,7 @@ public class DeviceCheckInTest
 		{
 			var request = HttpRequest.newBuilder(uri).build();
 
-			 return HttpClient.newHttpClient()
+			return HttpClient.newHttpClient()
 					.send(request, HttpResponse.BodyHandlers.ofString());
 		}
 		catch (InterruptedException | IOException e)
