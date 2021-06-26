@@ -37,7 +37,7 @@ public abstract class Handler implements HttpHandler
 
 	protected abstract Response handle(QueryParameterReader parameterReader, Connection connection);
 
-	protected static class Response
+	public static class Response
 	{
 
 		private final List<String> lines = new LinkedList<>();

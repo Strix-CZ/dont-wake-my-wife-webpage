@@ -5,6 +5,8 @@ import io.undertow.Undertow;
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
+import online.temer.alarm.server.device.CheckInHandler;
+import online.temer.alarm.server.device.DeviceAuthentication;
 
 public class Server
 {

@@ -1,7 +1,10 @@
-package online.temer.alarm.server;
+package online.temer.alarm.server.device;
 
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.server.Handler;
+import online.temer.alarm.server.Handler.Response;
+import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.util.DateTimeUtil;
 import online.temer.alarm.util.Hash;
 
@@ -27,7 +30,7 @@ public class DeviceAuthentication
 		DeviceDto deviceDto = deviceQuery.get(connection, deviceId);
 		if (deviceDto == null)
 		{
-			return new Result(new Handler.Response(400, "unknown device"));
+			return new Result(new Response(400, "unknown device"));
 		}
 
 		ZonedDateTime time = parameterReader.readTime("time", deviceDto.timeZone);
@@ -35,13 +38,13 @@ public class DeviceAuthentication
 
 		if (!isTimeOfRequestInTolerance(deviceDto, time))
 		{
-			return new Result(new Handler.Response(422, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
+			return new Result(new Response(422, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
 		}
 
 		String computedHash = calculateHash(deviceId, time.toLocalDateTime(), deviceDto.secretKey);
 		if (!computedHash.equals(hash))
 		{
-			return new Result(new Handler.Response(401, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
+			return new Result(new Response(401, DateTimeUtil.formatCurrentTime(deviceDto.timeZone)));
 		}
 
 		return new Result(deviceDto);
@@ -56,7 +59,7 @@ public class DeviceAuthentication
 	public static class Result
 	{
 		public final Optional<DeviceDto> device;
-		public final Handler.Response errorResponse;
+		public final Response errorResponse;
 
 		public Result(DeviceDto device)
 		{
@@ -64,7 +67,7 @@ public class DeviceAuthentication
 			this.errorResponse = null;
 		}
 
-		public Result(Handler.Response errorResponse)
+		public Result(Response errorResponse)
 		{
 			this.device = Optional.empty();
 			this.errorResponse = errorResponse;

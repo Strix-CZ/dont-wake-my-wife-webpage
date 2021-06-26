@@ -1,4 +1,4 @@
-package online.temer.alarm.server;
+package online.temer.alarm.server.device;
 
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
@@ -6,6 +6,8 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.server.Handler;
+import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.util.DateTimeUtil;
 
 import java.sql.Connection;

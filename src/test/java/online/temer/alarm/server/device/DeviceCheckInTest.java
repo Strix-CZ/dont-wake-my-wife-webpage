@@ -1,4 +1,4 @@
-package online.temer.alarm.server;
+package online.temer.alarm.server.device;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
@@ -7,6 +7,8 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.server.Server;
+import online.temer.alarm.server.device.DeviceAuthentication;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
