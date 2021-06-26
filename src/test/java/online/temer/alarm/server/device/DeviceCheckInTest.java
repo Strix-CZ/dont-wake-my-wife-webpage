@@ -1,17 +1,14 @@
 package online.temer.alarm.server.device;
 
-import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
-import online.temer.alarm.server.Server;
-import online.temer.alarm.server.device.DeviceAuthentication;
+import online.temer.alarm.server.ServerTestExtension;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,38 +28,17 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
-@ExtendWith(DbTestExtension.class)
+@ExtendWith(ServerTestExtension.class)
 public class DeviceCheckInTest
 {
-	private Server server;
 	private DeviceDto device;
 	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
-		TestConnectionProvider testConnectionProvider = new TestConnectionProvider();
-		connection = testConnectionProvider.get();
-
-		server = new Server(
-				8765,
-				"localhost",
-				testConnectionProvider,
-				new DeviceAuthentication(new DeviceQuery()),
-				new AlarmQuery(),
-				new DeviceCheckInQuery());
-
-		server.start();
-
-		var query = new DeviceQuery();
-
-		device = query.generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
-	}
-
-	@AfterEach
-	void tearDown()
-	{
-		server.stop();
+		connection = new TestConnectionProvider().get();
+		device = new DeviceQuery().generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
 	}
 
 	@Test
