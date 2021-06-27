@@ -6,9 +6,9 @@ import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.server.device.CheckInHandler;
 import online.temer.alarm.server.device.DeviceAuthentication;
 import online.temer.alarm.server.ui.AlarmHandler;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class ServerTestExtension extends DbTestExtension
@@ -25,10 +25,7 @@ public class ServerTestExtension extends DbTestExtension
 		server = new Server(
 				8765,
 				"localhost",
-				connectionProvider,
-				new DeviceAuthentication(new DeviceQuery()),
-				new AlarmQuery(),
-				new DeviceCheckInQuery(),
+				new CheckInHandler(new DeviceAuthentication(new DeviceQuery()), new AlarmQuery(), new DeviceCheckInQuery(), connectionProvider),
 				new AlarmHandler(connectionProvider));
 
 		server.start();
