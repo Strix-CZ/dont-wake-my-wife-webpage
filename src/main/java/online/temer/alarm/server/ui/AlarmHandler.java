@@ -16,6 +16,6 @@ public class AlarmHandler extends Handler
 	@Override
 	protected Response handle(QueryParameterReader parameterReader, Connection connection)
 	{
-		return new Response(200);
+		return new Response(200, "{}");
 	}
 }

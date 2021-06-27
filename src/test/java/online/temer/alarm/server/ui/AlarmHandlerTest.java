@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpResponse;
 
 @ExtendWith(ServerTestExtension.class)
 class AlarmHandlerTest
@@ -15,9 +16,21 @@ class AlarmHandlerTest
 	@Test
 	void whenQueried_returns200() throws URISyntaxException
 	{
-		var response = HttpUtil.makeGetRequest(new URI("http://localhost:8765/alarm"));
-		Assertions.assertThat(response.statusCode())
+		Assertions.assertThat(getAlarm().statusCode())
 				.as("status code")
 				.isEqualTo(200);
+	}
+
+	@Test
+	void noAlarmsSet_returnsEmptyObject() throws URISyntaxException
+	{
+		Assertions.assertThat(getAlarm().body())
+				.as("response body")
+				.isEqualTo("{}");
+	}
+
+	private HttpResponse<String> getAlarm() throws URISyntaxException
+	{
+		return HttpUtil.makeGetRequest(new URI("http://localhost:8765/alarm"));
 	}
 }
