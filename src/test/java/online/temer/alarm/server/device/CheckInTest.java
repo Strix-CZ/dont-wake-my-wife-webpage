@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 @ExtendWith(ServerTestExtension.class)
-public class DeviceCheckInTest
+public class CheckInTest
 {
 	private DeviceDto device;
 	private Connection connection;
