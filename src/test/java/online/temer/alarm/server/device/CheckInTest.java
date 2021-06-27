@@ -7,6 +7,7 @@ import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
+import online.temer.alarm.test.util.HttpUtil;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.Assertions;
@@ -14,11 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -44,21 +42,21 @@ public class CheckInTest
 	@Test
 	public void serverListens()
 	{
-		doCheckIn(device.id, 0, getTimeInDeviceTimeZone(0), ""); // Throws in case of time-out
+		makeGetRequest(device.id, 0, getTimeInDeviceTimeZone(0), ""); // Throws in case of time-out
 	}
 
 	@Test
 	void missingParameter_returns400() throws URISyntaxException
 	{
 		URI uri = new URIBuilder("http://localhost:8765/checkin").build();
-		Assertions.assertEquals(400, doCheckIn(uri).statusCode());
+		Assertions.assertEquals(400, HttpUtil.makeGetRequest(uri).statusCode());
 	}
 
 	@Test
 	public void checkIn_storesBattery()
 	{
 		TimeAssertion timeAssertion = new TimeAssertion();
-		HttpResponse<String> response = doCheckIn();
+		HttpResponse<String> response = makeGetRequest();
 		timeAssertion.untilNow();
 
 		Assertions.assertEquals(200, response.statusCode());
@@ -76,7 +74,7 @@ public class CheckInTest
 	@Test
 	public void noAlarmSet_checkInSendsNoAlarm()
 	{
-		var response = doCheckIn();
+		var response = makeGetRequest();
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
 		Assertions.assertEquals("none", getLine(response.body(), 1), "the last line should say none");
 	}
@@ -86,7 +84,7 @@ public class CheckInTest
 	{
 		new AlarmQuery()
 				.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
-		var response = doCheckIn();
+		var response = makeGetRequest();
 
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
 		Assertions.assertEquals("23:06:00", getLine(response.body(), 1));
@@ -102,12 +100,12 @@ public class CheckInTest
 		);
 	}
 
-	private HttpResponse<String> doCheckIn()
+	private HttpResponse<String> makeGetRequest()
 	{
 		ZonedDateTime time = getTimeInDeviceTimeZone(0);
 		String hash = DeviceAuthentication.calculateHash(device.id, time.toLocalDateTime(), device.secretKey);
 
-		return doCheckIn(device.id, 100, time, hash);
+		return makeGetRequest(device.id, 100, time, hash);
 	}
 
 	private String getLine(String text, int lineNumber)
@@ -128,7 +126,7 @@ public class CheckInTest
 				.plusSeconds(offsetSeconds);
 	}
 
-	private HttpResponse<String> doCheckIn(long deviceId, int battery, ZonedDateTime time, String hash)
+	private HttpResponse<String> makeGetRequest(long deviceId, int battery, ZonedDateTime time, String hash)
 	{
 		try
 		{
@@ -139,7 +137,7 @@ public class CheckInTest
 					.addParameter("hash", hash)
 					.build();
 
-			return doCheckIn(uri);
+			return HttpUtil.makeGetRequest(uri);
 		}
 		catch (URISyntaxException e)
 		{
@@ -147,18 +145,4 @@ public class CheckInTest
 		}
 	}
 
-	private HttpResponse<String> doCheckIn(URI uri)
-	{
-		try
-		{
-			var request = HttpRequest.newBuilder(uri).build();
-
-			return HttpClient.newHttpClient()
-					.send(request, HttpResponse.BodyHandlers.ofString());
-		}
-		catch (InterruptedException | IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
 }
