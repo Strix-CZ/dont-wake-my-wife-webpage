@@ -4,6 +4,7 @@ import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 
 import java.sql.Connection;
+import java.util.Optional;
 
 public class UserAuthentication
 {
@@ -14,9 +15,9 @@ public class UserAuthentication
 		this.deviceQuery = deviceQuery;
 	}
 
-	public DeviceDto authenticate(Connection connection)
+	public Optional<DeviceDto> authenticate(Connection connection)
 	{
 		// No authorization at the moment. Just return any device.
-		return deviceQuery.get(connection);
+		return Optional.ofNullable(deviceQuery.get(connection));
 	}
 }
