@@ -56,6 +56,21 @@ public class DeviceQuery
 		}
 	}
 
+	public DeviceDto get(Connection connection)
+	{
+		try
+		{
+			return new QueryRunner().query(
+					connection,
+					"SELECT id, timeCreated, timeZone, secretKey FROM Device",
+					new Handler());
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static class Handler implements ResultSetHandler<DeviceDto>
 	{
 		@Override

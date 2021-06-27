@@ -45,4 +45,13 @@ class DeviceDtoTest
 		Assertions.assertEquals(timeZone, device.timeZone, "timeZone");
 		Assertions.assertEquals("secretKey", device.secretKey, "secretKey");
 	}
+
+	@Test
+	void whenThereAreMultipleDevices_getWithoutIdReturnsAnyOfThem()
+	{
+		query.generateSaveAndLoadDevice(connection);
+		query.generateSaveAndLoadDevice(connection);
+
+		Assertions.assertNotNull(query.get(connection));
+	}
 }

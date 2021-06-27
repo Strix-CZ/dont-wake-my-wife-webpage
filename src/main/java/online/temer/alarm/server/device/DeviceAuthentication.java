@@ -2,7 +2,6 @@ package online.temer.alarm.server.device;
 
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
-import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.Handler.Response;
 import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.util.DateTimeUtil;
