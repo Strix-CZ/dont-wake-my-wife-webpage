@@ -28,7 +28,7 @@ public class ServerTestExtension extends DbTestExtension
 				8765,
 				"localhost",
 				new CheckInHandler(new DeviceAuthentication(deviceQuery), new AlarmQuery(), new DeviceCheckInQuery(), connectionProvider),
-				new AlarmHandler(connectionProvider, new UserAuthentication(deviceQuery)));
+				new AlarmHandler(connectionProvider, new UserAuthentication(deviceQuery), new AlarmQuery()));
 
 		server.start();
 	}
