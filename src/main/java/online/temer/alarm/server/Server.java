@@ -34,6 +34,7 @@ public class Server
 	{
 		HttpHandler router = new RoutingHandler()
 				.get("/checkin", checkInHandler)
+				.post("/alarm", alarmHandler)
 				.get("/alarm", alarmHandler);
 
 		return Undertow.builder()

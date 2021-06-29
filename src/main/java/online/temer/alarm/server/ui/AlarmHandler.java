@@ -5,8 +5,11 @@ import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.Connection;
+import java.time.LocalTime;
 
 public class AlarmHandler extends Handler
 {
@@ -34,10 +37,36 @@ public class AlarmHandler extends Handler
 		{
 			return new Response(200, "{}");
 		}
-		else {
+		else
+		{
 			return new Response(200,
 					"{hour:" + alarm.time.getHour() + ","
-							+"minute:"+ alarm.time.getMinute()+"}");
+							+ "minute:" + alarm.time.getMinute() + "}");
+		}
+	}
+
+	@Override
+	protected Response handlePost(QueryParameterReader parameterReader, String body, Connection connection)
+	{
+		var device = userAuthentication.authenticate(connection);
+		if (device.isEmpty())
+		{
+			return new Response(401);
+		}
+
+		try
+		{
+			var object = new JSONObject(body);
+			var time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
+			var alarmDto = new AlarmDto(device.get().id, time);
+
+			alarmQuery.insertOrUpdateAlarm(connection, alarmDto);
+
+			return new Response(200);
+		}
+		catch (JSONException e)
+		{
+			return new Response(400, "incorrect JSON");
 		}
 	}
 }
