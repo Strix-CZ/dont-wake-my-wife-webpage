@@ -1,14 +1,11 @@
 package online.temer.alarm.server;
 
-import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.RoutingHandler;
 import online.temer.alarm.server.device.CheckInHandler;
 import online.temer.alarm.server.ui.AlarmHandler;
+import spark.Spark;
 
 public class Server
 {
-	private final Undertow server;
 	private final CheckInHandler checkInHandler;
 	private final AlarmHandler alarmHandler;
 
@@ -17,29 +14,21 @@ public class Server
 		this.checkInHandler = checkInHandler;
 		this.alarmHandler = alarmHandler;
 
-		server = createServer(port, host);
-	}
-
-	public void start()
-	{
-		server.start();
+		createServer(port, host);
 	}
 
 	public void stop()
 	{
-		server.stop();
+		Spark.stop();
 	}
 
-	private Undertow createServer(int port, String host)
+	private void createServer(int port, String host)
 	{
-		HttpHandler router = new RoutingHandler()
-				.get("/checkin", checkInHandler)
-				.post("/alarm", alarmHandler)
-				.get("/alarm", alarmHandler);
+		Spark.ipAddress(host);
+		Spark.port(port);
 
-		return Undertow.builder()
-				.addHttpListener(port, host)
-				.setHandler(router)
-				.build();
+		Spark.get("/checkin", checkInHandler);
+		Spark.get("/alarm", alarmHandler);
+		Spark.post("/alarm", alarmHandler);
 	}
 }

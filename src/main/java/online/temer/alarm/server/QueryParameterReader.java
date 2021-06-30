@@ -1,21 +1,28 @@
 package online.temer.alarm.server;
 
+import spark.Request;
+
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Deque;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 public class QueryParameterReader
 {
-	private final Map<String, Deque<String>> parameters;
+	private final Map<String, List<String>> parameters;
 
-	public QueryParameterReader(Map<String, Deque<String>> parameters)
+	public QueryParameterReader(Request request)
 	{
-		this.parameters = parameters;
+		parameters = request.queryParams().stream()
+				.collect(Collectors.toMap(
+						k -> k,
+						k -> Arrays.asList(request.queryParamsValues(k))));
 	}
 
 	public QueryParameterReader(String... keysAndValues)
@@ -26,10 +33,10 @@ public class QueryParameterReader
 		}
 
 		parameters = new HashMap<>(keysAndValues.length / 2);
-		for (int i = 0; i < keysAndValues.length; i+=2)
+		for (int i = 0; i < keysAndValues.length; i += 2)
 		{
 			String key = keysAndValues[i];
-			String value = keysAndValues[i+1];
+			String value = keysAndValues[i + 1];
 
 			parameters.computeIfAbsent(key, k -> new LinkedList<>())
 					.add(value);
@@ -43,7 +50,7 @@ public class QueryParameterReader
 		if (deque == null || deque.isEmpty())
 			throw new IncorrectParameter(name);
 
-		String parameter = deque.peekFirst();
+		String parameter = deque.get(0);
 		if (parameter == null)
 			throw new IncorrectParameter(name);
 

@@ -1,16 +1,14 @@
 package online.temer.alarm.server;
 
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import online.temer.alarm.db.ConnectionProvider;
+import spark.Request;
+import spark.Route;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Handler implements HttpHandler
+public abstract class Handler implements Route
 {
 	private final ConnectionProvider connectionProvider;
 
@@ -27,43 +25,31 @@ public abstract class Handler implements HttpHandler
 	}
 
 	@Override
-	public void handleRequest(HttpServerExchange exchange)
+	public Object handle(Request request, spark.Response response)
 	{
 		try
 		{
-			if (exchange.getRequestMethod().equals(Methods.POST))
+			var parameterReader = new QueryParameterReader(request);
+			var connection = connectionProvider.get();
+			final Handler.Response handlerResponse;
+
+			if (request.requestMethod().equals("POST"))
 			{
-				exchange.getRequestReceiver().receiveFullString(this::handlePostRequestInternal, StandardCharsets.UTF_8);
+				handlerResponse = handlePost(parameterReader, request.body(), connection);
 			}
 			else
 			{
-				handleGetRequestInternal(exchange);
+				handlerResponse = handle(parameterReader, connection);
 			}
+
+			response.status(handlerResponse.getCode());
+			return handlerResponse.getBody();
 		}
 		catch (IncorrectRequest e)
 		{
-			sendResponse(exchange, e.response);
+			response.status(e.response.getCode());
+			return e.response.getBody();
 		}
-	}
-
-	private void handleGetRequestInternal(HttpServerExchange exchange)
-	{
-		var parameterReader = new QueryParameterReader(exchange.getQueryParameters());
-		var response = handle(parameterReader, connectionProvider.get());
-		sendResponse(exchange, response);
-	}
-
-	private void handlePostRequestInternal(HttpServerExchange exchange1, String body)
-	{
-		var parameterReader = new QueryParameterReader(exchange1.getQueryParameters());
-		var response = handlePost(parameterReader, body, connectionProvider.get());
-		sendResponse(exchange1, response);
-	}
-
-	private void sendResponse(HttpServerExchange exchange, Response response)
-	{
-		exchange.setStatusCode(response.getCode());
-		exchange.getResponseSender().send(response.getBody());
 	}
 
 	public static class Response
