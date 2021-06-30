@@ -17,8 +17,6 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- Handler to get the time of alarm
-- Handler to set the time of alarm
 - Authentication method for 1 hard-coded user  
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
