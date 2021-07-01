@@ -2,11 +2,13 @@ package online.temer.alarm.server.ui;
 
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.server.Handler;
+import online.temer.alarm.server.QueryParameterReader;
+import online.temer.alarm.server.authentication.Authentication;
 
 import java.sql.Connection;
-import java.util.Optional;
 
-public class UserAuthentication
+public class UserAuthentication implements Authentication<DeviceDto>
 {
 	private final DeviceQuery deviceQuery;
 
@@ -15,9 +17,18 @@ public class UserAuthentication
 		this.deviceQuery = deviceQuery;
 	}
 
-	public Optional<DeviceDto> authenticate(Connection connection)
+	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader queryParameterReader)
 	{
 		// No authorization at the moment. Just return any device.
-		return Optional.ofNullable(deviceQuery.get(connection));
+		var device = deviceQuery.get(connection);
+
+		if (device == null)
+		{
+			return new Result<>(new Handler.Response(401));
+		}
+		else
+		{
+			return new Result<>(device);
+		}
 	}
 }

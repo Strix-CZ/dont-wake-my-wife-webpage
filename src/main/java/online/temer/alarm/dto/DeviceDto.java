@@ -2,6 +2,7 @@ package online.temer.alarm.dto;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,23 @@ public class DeviceDto
 		this.timeCreated = timeCreated;
 		this.timeZone = timeZone;
 		this.secretKey = secretKey;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		DeviceDto deviceDto = (DeviceDto) o;
+		return Objects.equals(id, deviceDto.id) && Objects.equals(timeCreated, deviceDto.timeCreated) && Objects.equals(timeZone, deviceDto.timeZone) && Objects.equals(secretKey, deviceDto.secretKey);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(id, timeCreated, timeZone, secretKey);
 	}
 
 	public static DeviceDto generateDevice()

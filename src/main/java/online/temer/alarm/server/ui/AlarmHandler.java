@@ -26,13 +26,13 @@ public class AlarmHandler extends Handler
 	@Override
 	protected Response handle(QueryParameterReader parameterReader, Connection connection)
 	{
-		var device = userAuthentication.authenticate(connection);
-		if (device.isEmpty())
+		var result = userAuthentication.authenticate(connection, parameterReader);
+		if (result.entity.isEmpty())
 		{
 			return new Response(401);
 		}
 
-		AlarmDto alarm = alarmQuery.get(connection, device.get().id);
+		AlarmDto alarm = alarmQuery.get(connection, result.entity.get().id);
 		if (alarm == null)
 		{
 			return new Response(200, "{}");
@@ -48,8 +48,8 @@ public class AlarmHandler extends Handler
 	@Override
 	protected Response handlePost(QueryParameterReader parameterReader, String body, Connection connection)
 	{
-		var device = userAuthentication.authenticate(connection);
-		if (device.isEmpty())
+		var result = userAuthentication.authenticate(connection, parameterReader);
+		if (result.entity.isEmpty())
 		{
 			return new Response(401);
 		}
@@ -58,7 +58,7 @@ public class AlarmHandler extends Handler
 		{
 			var object = new JSONObject(body);
 			var time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
-			var alarmDto = new AlarmDto(device.get().id, time);
+			var alarmDto = new AlarmDto(result.entity.get().id, time);
 
 			alarmQuery.insertOrUpdateAlarm(connection, alarmDto);
 

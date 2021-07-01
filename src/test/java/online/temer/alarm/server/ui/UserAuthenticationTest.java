@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
+import java.util.Optional;
 
 @ExtendWith(DbTestExtension.class)
 class UserAuthenticationTest
@@ -28,18 +29,20 @@ class UserAuthenticationTest
 	@Test
 	void noDevice_authenticationFails()
 	{
-		Assertions.assertThat(userAuthentication.authenticate(connection))
+		Assertions.assertThat(userAuthentication.authenticate(connection, null))
 				.as("Device should be present")
-				.isEmpty();
+				.extracting(r -> r.entity)
+				.isEqualTo(Optional.empty());
 	}
 
 	@Test
 	void devicePresentInDb_authenticationReturnsIt()
 	{
-		deviceQuery.generateSaveAndLoadDevice(connection);
+		var deviceDto = deviceQuery.generateSaveAndLoadDevice(connection);
 
-		Assertions.assertThat(userAuthentication.authenticate(connection))
+		Assertions.assertThat(userAuthentication.authenticate(connection, null))
 				.as("Device should be present")
-				.isPresent();
+				.extracting(r -> r.entity)
+				.isEqualTo(Optional.of(deviceDto));
 	}
 }
