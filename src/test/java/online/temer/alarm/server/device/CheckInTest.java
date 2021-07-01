@@ -7,6 +7,7 @@ import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
+import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.test.util.HttpUtil;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.apache.http.client.utils.URIBuilder;

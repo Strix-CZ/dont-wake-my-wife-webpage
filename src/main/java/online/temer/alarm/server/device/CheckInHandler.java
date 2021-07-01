@@ -8,6 +8,7 @@ import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
+import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.util.DateTimeUtil;
 
 import java.sql.Connection;

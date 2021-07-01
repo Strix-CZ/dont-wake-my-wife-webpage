@@ -1,4 +1,4 @@
-package online.temer.alarm.server.device;
+package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;

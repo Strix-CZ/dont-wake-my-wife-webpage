@@ -7,9 +7,9 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.device.CheckInHandler;
-import online.temer.alarm.server.device.DeviceAuthentication;
+import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.server.ui.AlarmHandler;
-import online.temer.alarm.server.ui.UserAuthentication;
+import online.temer.alarm.server.authentication.UserAuthentication;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class ServerTestExtension extends DbTestExtension

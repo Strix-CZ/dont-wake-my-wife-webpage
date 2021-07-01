@@ -6,6 +6,7 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
+import online.temer.alarm.server.authentication.UserAuthentication;
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -3,6 +3,7 @@ package online.temer.alarm.server.ui;
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.server.authentication.UserAuthentication;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

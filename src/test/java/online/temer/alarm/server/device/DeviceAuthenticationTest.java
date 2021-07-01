@@ -7,7 +7,7 @@ import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.IncorrectParameter;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.device.DeviceAuthentication;
+import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
