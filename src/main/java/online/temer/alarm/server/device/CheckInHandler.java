@@ -14,29 +14,20 @@ import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class CheckInHandler extends Handler
+public class CheckInHandler extends Handler<DeviceDto>
 {
-	private final DeviceAuthentication deviceAuthentication;
 	private final AlarmQuery alarmQuery;
 	private final DeviceCheckInQuery deviceCheckInQuery;
 
 	public CheckInHandler(DeviceAuthentication deviceAuthentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider)
 	{
-		super(connectionProvider);
-		this.deviceAuthentication = deviceAuthentication;
+		super(connectionProvider, deviceAuthentication);
 		this.alarmQuery = alarmQuery;
 		this.deviceCheckInQuery = deviceCheckInQuery;
 	}
 
-	public Response handle(QueryParameterReader parameterReader, Connection connection)
+	public Response handle(DeviceDto device, QueryParameterReader parameterReader, Connection connection)
 	{
-		var authenticationResult = deviceAuthentication.authenticate(connection, parameterReader);
-		if (authenticationResult.entity.isEmpty())
-		{
-			return authenticationResult.errorResponse;
-		}
-		DeviceDto device = authenticationResult.entity.get();
-
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);
 

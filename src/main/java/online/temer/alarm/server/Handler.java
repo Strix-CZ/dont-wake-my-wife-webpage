@@ -1,6 +1,7 @@
 package online.temer.alarm.server;
 
 import online.temer.alarm.db.ConnectionProvider;
+import online.temer.alarm.server.authentication.Authentication;
 import spark.Request;
 import spark.Route;
 
@@ -8,18 +9,20 @@ import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Handler implements Route
+public abstract class Handler<E> implements Route
 {
 	private final ConnectionProvider connectionProvider;
+	private final Authentication<E> authentication;
 
-	public Handler(ConnectionProvider connectionProvider)
+	public Handler(ConnectionProvider connectionProvider, Authentication<E> authentication)
 	{
 		this.connectionProvider = connectionProvider;
+		this.authentication = authentication;
 	}
 
-	protected abstract Response handle(QueryParameterReader parameterReader, Connection connection);
+	protected abstract Response handle(E loggedInEntity, QueryParameterReader parameterReader, Connection connection);
 
-	protected Response handlePost(QueryParameterReader parameterReader, String body, Connection connection)
+	protected Response handlePost(E loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection)
 	{
 		return new Response(400);
 	}
@@ -33,13 +36,20 @@ public abstract class Handler implements Route
 			var connection = connectionProvider.get();
 			final Handler.Response handlerResponse;
 
+			var authenticationResult = authentication.authenticate(connection, parameterReader);
+			if (authenticationResult.entity.isEmpty())
+			{
+				response.status(authenticationResult.errorResponse.getCode());
+				return authenticationResult.errorResponse.getBody();
+			}
+
 			if (request.requestMethod().equals("POST"))
 			{
-				handlerResponse = handlePost(parameterReader, request.body(), connection);
+				handlerResponse = handlePost(authenticationResult.entity.get(), parameterReader, request.body(), connection);
 			}
 			else
 			{
-				handlerResponse = handle(parameterReader, connection);
+				handlerResponse = handle(authenticationResult.entity.get(), parameterReader, connection);
 			}
 
 			response.status(handlerResponse.getCode());
