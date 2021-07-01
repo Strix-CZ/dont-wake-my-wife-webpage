@@ -7,6 +7,7 @@ import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
 import online.temer.alarm.test.util.HttpUtil;
+import online.temer.alarm.util.TestAuthentication;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,30 +23,21 @@ import java.time.LocalTime;
 @ExtendWith(ServerTestExtension.class)
 class AlarmHandlerTest
 {
-	private DeviceQuery deviceQuery;
+	private DeviceDto device;
 	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		deviceQuery = new DeviceQuery();
-	}
-
-	@Test
-	void noDevice_returns401()
-	{
-		Assertions.assertThat(getAlarm().statusCode())
-				.as("status code")
-				.isEqualTo(401);
+		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
+		TestAuthentication.setAuthenticatedDevice(device);
 	}
 
 	@Test
 	void whenQueried_returns200()
 	{
-		deviceQuery.generateSaveAndLoadDevice(connection);
-
-		Assertions.assertThat(getAlarm().statusCode())
+		Assertions.assertThat(getAlarmInGetRequest().statusCode())
 				.as("status code")
 				.isEqualTo(200);
 	}
@@ -53,9 +45,7 @@ class AlarmHandlerTest
 	@Test
 	void noAlarmsSet_returnsEmptyObject()
 	{
-		deviceQuery.generateSaveAndLoadDevice(connection);
-
-		Assertions.assertThat(getAlarm().body())
+		Assertions.assertThat(getAlarmInGetRequest().body())
 				.as("response body")
 				.isEqualTo("{}");
 	}
@@ -63,9 +53,9 @@ class AlarmHandlerTest
 	@Test
 	void alarmIsSet_returnsIt()
 	{
-		createDeviceAndSetAlarm(22, 50);
+		setAlarmInDatabase(22, 50);
 
-		var responseJson = new JSONObject(getAlarm().body());
+		var responseJson = new JSONObject(getAlarmInGetRequest().body());
 
 		Assertions.assertThat(responseJson.get("hour"))
 				.as("hour")
@@ -79,8 +69,7 @@ class AlarmHandlerTest
 	@Test
 	void noAlarmIsSet_postSetsIt()
 	{
-		var device = deviceQuery.generateSaveAndLoadDevice(connection);
-		setAlarm(4, 0);
+		setAlarmInPostRequest(4, 0);
 
 		var alarm = new AlarmQuery().get(connection, device.id);
 
@@ -92,8 +81,8 @@ class AlarmHandlerTest
 	@Test
 	void alarmIsSet_postUpdatesIt()
 	{
-		var device = createDeviceAndSetAlarm(20, 0);
-		setAlarm(0, 0);
+		var device = setAlarmInDatabase(20, 0);
+		setAlarmInPostRequest(0, 0);
 
 		var alarm = new AlarmQuery().get(connection, device.id);
 
@@ -102,15 +91,14 @@ class AlarmHandlerTest
 				.isEqualTo(LocalTime.of(0, 0));
 	}
 
-	private DeviceDto createDeviceAndSetAlarm(int hour, int minute)
+	private DeviceDto setAlarmInDatabase(int hour, int minute)
 	{
-		var device = deviceQuery.generateSaveAndLoadDevice(connection);
 		var alarm = new AlarmDto(device.id, LocalTime.of(hour, minute));
 		new AlarmQuery().insertOrUpdateAlarm(connection, alarm);
 		return device;
 	}
 
-	private HttpResponse<String> getAlarm()
+	private HttpResponse<String> getAlarmInGetRequest()
 	{
 		try
 		{
@@ -122,7 +110,7 @@ class AlarmHandlerTest
 		}
 	}
 
-	private HttpResponse<String> setAlarm(int hour, int minute)
+	private HttpResponse<String> setAlarmInPostRequest(int hour, int minute)
 	{
 		try
 		{

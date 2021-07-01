@@ -8,7 +8,7 @@ import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.authentication.DeviceAuthentication;
+import online.temer.alarm.server.authentication.Authentication;
 import online.temer.alarm.util.DateTimeUtil;
 
 import java.sql.Connection;
@@ -20,9 +20,9 @@ public class CheckInHandler extends Handler<DeviceDto>
 	private final AlarmQuery alarmQuery;
 	private final DeviceCheckInQuery deviceCheckInQuery;
 
-	public CheckInHandler(DeviceAuthentication deviceAuthentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider)
+	public CheckInHandler(Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider)
 	{
-		super(connectionProvider, deviceAuthentication);
+		super(connectionProvider, authentication);
 		this.alarmQuery = alarmQuery;
 		this.deviceCheckInQuery = deviceCheckInQuery;
 	}

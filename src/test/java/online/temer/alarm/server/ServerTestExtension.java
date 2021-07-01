@@ -5,12 +5,12 @@ import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
-import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.device.CheckInHandler;
-import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.server.ui.AlarmHandler;
-import online.temer.alarm.server.authentication.UserAuthentication;
+import online.temer.alarm.util.TestAuthentication;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
+import java.sql.SQLException;
 
 public class ServerTestExtension extends DbTestExtension
 {
@@ -22,13 +22,21 @@ public class ServerTestExtension extends DbTestExtension
 		super.beforeAll(context);
 
 		ConnectionProvider connectionProvider = new TestConnectionProvider();
-		DeviceQuery deviceQuery = new DeviceQuery();
+		TestAuthentication authentication = new TestAuthentication();
 
 		server = new Server(
 				8765,
 				"localhost",
-				new CheckInHandler(new DeviceAuthentication(deviceQuery), new AlarmQuery(), new DeviceCheckInQuery(), connectionProvider),
-				new AlarmHandler(connectionProvider, new UserAuthentication(deviceQuery), new AlarmQuery()));
+				new CheckInHandler(authentication, new AlarmQuery(), new DeviceCheckInQuery(), connectionProvider),
+				new AlarmHandler(connectionProvider, authentication, new AlarmQuery()));
+	}
+
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws SQLException
+	{
+		super.afterEach(extensionContext);
+
+		TestAuthentication.setAuthenticationUndefined();
 	}
 
 	@Override

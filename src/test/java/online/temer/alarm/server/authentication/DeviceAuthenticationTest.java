@@ -116,6 +116,35 @@ class DeviceAuthenticationTest
 		timeAssertion.assertCurrentTimeIgnoringNanos(sentTime, device.timeZone);
 	}
 
+	@Test
+	void correctRequest_returnsTheDevice()
+	{
+		var time = getFormattedTimeInDeviceTimeZone(0);
+		var hash = DeviceAuthentication.calculateHash(device.id, LocalDateTime.parse(time, DateTimeFormatter.ISO_LOCAL_DATE_TIME), device.secretKey);
+		var parameters = new QueryParameterReader(
+				"device", device.id.toString(),
+				"time", time,
+				"hash", hash);
+
+		var authenticatedDevice = deviceAuthentication.authenticate(connection, parameters, null, null).getEntity();
+
+		Assertions.assertThat(authenticatedDevice)
+				.as("authenticated device")
+				.isPresent()
+				.get()
+				.isEqualTo(device);
+	}
+
+	@Test
+	public void calculateHashTest()
+	{
+		// The hashed message should be "18 2021-02-27T23:01:59"
+		org.junit.jupiter.api.Assertions.assertEquals(
+				"8d58d7d2ca69ac0b522e0096b765ada4c155f70cfdab741f0f4ee2da7dc51576",
+				DeviceAuthentication.calculateHash(18L, LocalDateTime.of(2021, 2, 27, 23, 1, 59), "secret")
+		);
+	}
+
 	private void assertAuthenticationThrowsIncorrectParameter(QueryParameterReader parameters)
 	{
 		Assertions.assertThatThrownBy(() -> deviceAuthentication.authenticate(connection, parameters, null, null))

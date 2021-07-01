@@ -6,7 +6,7 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.authentication.UserAuthentication;
+import online.temer.alarm.server.authentication.Authentication;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,9 +17,9 @@ public class AlarmHandler extends Handler<DeviceDto>
 {
 	private final AlarmQuery alarmQuery;
 
-	public AlarmHandler(ConnectionProvider connectionProvider, UserAuthentication userAuthentication, AlarmQuery alarmQuery)
+	public AlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery)
 	{
-		super(connectionProvider, userAuthentication);
+		super(connectionProvider, authentication);
 		this.alarmQuery = alarmQuery;
 	}
 

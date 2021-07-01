@@ -7,9 +7,9 @@ import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
-import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.test.util.HttpUtil;
 import online.temer.alarm.test.util.TimeAssertion;
+import online.temer.alarm.util.TestAuthentication;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,11 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.sql.Connection;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 @ExtendWith(ServerTestExtension.class)
@@ -38,12 +35,13 @@ public class CheckInTest
 	{
 		connection = new TestConnectionProvider().get();
 		device = new DeviceQuery().generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
+		TestAuthentication.setAuthenticatedDevice(device);
 	}
 
 	@Test
 	public void serverListens()
 	{
-		makeGetRequest(device.id, 0, getTimeInDeviceTimeZone(0), ""); // Throws in case of time-out
+		makeGetRequest(0); // Throws in case of time-out
 	}
 
 	@Test
@@ -57,7 +55,7 @@ public class CheckInTest
 	public void checkIn_storesBattery()
 	{
 		TimeAssertion timeAssertion = new TimeAssertion();
-		HttpResponse<String> response = makeGetRequest();
+		HttpResponse<String> response = makeGetRequest(100);
 		timeAssertion.untilNow();
 
 		Assertions.assertEquals(200, response.statusCode());
@@ -75,7 +73,7 @@ public class CheckInTest
 	@Test
 	public void noAlarmSet_checkInSendsNoAlarm()
 	{
-		var response = makeGetRequest();
+		var response = makeGetRequest(100);
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
 		Assertions.assertEquals("none", getLine(response.body(), 1), "the last line should say none");
 	}
@@ -85,28 +83,10 @@ public class CheckInTest
 	{
 		new AlarmQuery()
 				.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
-		var response = makeGetRequest();
+		var response = makeGetRequest(100);
 
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");
 		Assertions.assertEquals("23:06:00", getLine(response.body(), 1));
-	}
-
-	@Test
-	public void calculateHashTest()
-	{
-		// The hashed message should be "18 2021-02-27T23:01:59"
-		Assertions.assertEquals(
-				"8d58d7d2ca69ac0b522e0096b765ada4c155f70cfdab741f0f4ee2da7dc51576",
-				DeviceAuthentication.calculateHash(18L, LocalDateTime.of(2021, 2, 27, 23, 1, 59), "secret")
-		);
-	}
-
-	private HttpResponse<String> makeGetRequest()
-	{
-		ZonedDateTime time = getTimeInDeviceTimeZone(0);
-		String hash = DeviceAuthentication.calculateHash(device.id, time.toLocalDateTime(), device.secretKey);
-
-		return makeGetRequest(device.id, 100, time, hash);
 	}
 
 	private String getLine(String text, int lineNumber)
@@ -120,22 +100,12 @@ public class CheckInTest
 		return lines[lineNumber];
 	}
 
-	private ZonedDateTime getTimeInDeviceTimeZone(int offsetSeconds)
-	{
-		return ZonedDateTime
-				.now(device.timeZone.toZoneId())
-				.plusSeconds(offsetSeconds);
-	}
-
-	private HttpResponse<String> makeGetRequest(long deviceId, int battery, ZonedDateTime time, String hash)
+	private HttpResponse<String> makeGetRequest(int battery)
 	{
 		try
 		{
 			URI uri = new URIBuilder("http://localhost:8765/checkin")
-					.addParameter("device", Long.toString(deviceId))
-					.addParameter("time", time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
 					.addParameter("battery", Integer.toString(battery))
-					.addParameter("hash", hash)
 					.build();
 
 			return HttpUtil.makeGetRequest(uri);

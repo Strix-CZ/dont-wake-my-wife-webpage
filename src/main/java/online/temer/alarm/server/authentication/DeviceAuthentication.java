@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DeviceAuthentication implements Authentication<DeviceDto>
+class DeviceAuthentication implements Authentication<DeviceDto>
 {
 	private final DeviceQuery deviceQuery;
 
@@ -55,7 +55,7 @@ public class DeviceAuthentication implements Authentication<DeviceDto>
 		return Math.abs(time.toEpochSecond() - nowInTimeZoneOfDevice) <= 10;
 	}
 
-	public static String calculateHash(Long deviceId, LocalDateTime time, String secretKey)
+	static String calculateHash(Long deviceId, LocalDateTime time, String secretKey)
 	{
 		return new Hash()
 				.addToMessage(deviceId)
