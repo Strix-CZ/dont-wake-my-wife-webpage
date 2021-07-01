@@ -36,4 +36,7 @@ user can get notified when the battery is too low.
     - If I don't clear the alarm, call my on my phone.  
     - If I don't respond, call my wife on my phone.
     - If she doesn't respond, give up.
-    
+- Planned gradual adjustment to a different time-zone
+  or when switching to/from daylight savings time.
+- Offer the gradual adjustment in e-mail to users that
+  are going to experience the switch soon.
