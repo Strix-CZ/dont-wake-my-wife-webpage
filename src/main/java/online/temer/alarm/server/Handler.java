@@ -20,12 +20,7 @@ public abstract class Handler<E> implements Route
 		this.authentication = authentication;
 	}
 
-	protected abstract Response handle(E loggedInEntity, QueryParameterReader parameterReader, Connection connection);
-
-	protected Response handlePost(E loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection)
-	{
-		return new Response(400);
-	}
+	protected abstract Response handle(E loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection);
 
 	@Override
 	public Object handle(Request request, spark.Response response)
@@ -42,15 +37,8 @@ public abstract class Handler<E> implements Route
 				response.status(authenticationResult.errorResponse.getCode());
 				return authenticationResult.errorResponse.getBody();
 			}
-
-			if (request.requestMethod().equals("POST"))
-			{
-				handlerResponse = handlePost(authenticationResult.entity.get(), parameterReader, request.body(), connection);
-			}
-			else
-			{
-				handlerResponse = handle(authenticationResult.entity.get(), parameterReader, connection);
-			}
+			
+			handlerResponse = handle(authenticationResult.entity.get(), parameterReader, request.body(), connection);
 
 			response.status(handlerResponse.getCode());
 			return handlerResponse.getBody();

@@ -1,18 +1,21 @@
 package online.temer.alarm.server;
 
 import online.temer.alarm.server.device.CheckInHandler;
-import online.temer.alarm.server.ui.AlarmHandler;
+import online.temer.alarm.server.ui.GetAlarmHandler;
+import online.temer.alarm.server.ui.SetAlarmHandler;
 import spark.Spark;
 
 public class Server
 {
 	private final CheckInHandler checkInHandler;
-	private final AlarmHandler alarmHandler;
+	private final GetAlarmHandler getAlarmHandler;
+	private final SetAlarmHandler setAlarmHandler;
 
-	public Server(int port, String host, CheckInHandler checkInHandler, AlarmHandler alarmHandler)
+	public Server(int port, String host, CheckInHandler checkInHandler, GetAlarmHandler getAlarmHandler, SetAlarmHandler setAlarmHandler)
 	{
 		this.checkInHandler = checkInHandler;
-		this.alarmHandler = alarmHandler;
+		this.getAlarmHandler = getAlarmHandler;
+		this.setAlarmHandler = setAlarmHandler;
 
 		createServer(port, host);
 	}
@@ -28,7 +31,7 @@ public class Server
 		Spark.port(port);
 
 		Spark.get("/checkin", checkInHandler);
-		Spark.get("/alarm", alarmHandler);
-		Spark.post("/alarm", alarmHandler);
+		Spark.get("/alarm", getAlarmHandler);
+		Spark.post("/alarm", setAlarmHandler);
 	}
 }

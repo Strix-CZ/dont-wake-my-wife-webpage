@@ -27,7 +27,7 @@ public class CheckInHandler extends Handler<DeviceDto>
 		this.deviceCheckInQuery = deviceCheckInQuery;
 	}
 
-	public Response handle(DeviceDto device, QueryParameterReader parameterReader, Connection connection)
+	public Response handle(DeviceDto device, QueryParameterReader parameterReader, String body, Connection connection)
 	{
 		int battery = parameterReader.readInt("battery");
 		logCheckIn(connection, device.id, battery);

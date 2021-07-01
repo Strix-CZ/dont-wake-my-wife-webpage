@@ -13,34 +13,18 @@ import org.json.JSONObject;
 import java.sql.Connection;
 import java.time.LocalTime;
 
-public class AlarmHandler extends Handler<DeviceDto>
+public class SetAlarmHandler extends Handler<DeviceDto>
 {
 	private final AlarmQuery alarmQuery;
 
-	public AlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery)
+	public SetAlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery)
 	{
 		super(connectionProvider, authentication);
 		this.alarmQuery = alarmQuery;
 	}
 
 	@Override
-	protected Response handle(DeviceDto device, QueryParameterReader parameterReader, Connection connection)
-	{
-		AlarmDto alarm = alarmQuery.get(connection, device.id);
-		if (alarm == null)
-		{
-			return new Response(200, "{}");
-		}
-		else
-		{
-			return new Response(200,
-					"{hour:" + alarm.time.getHour() + ","
-							+ "minute:" + alarm.time.getMinute() + "}");
-		}
-	}
-
-	@Override
-	protected Response handlePost(DeviceDto device, QueryParameterReader parameterReader, String body, Connection connection)
+	protected Response handle(DeviceDto device, QueryParameterReader parameterReader, String body, Connection connection)
 	{
 		try
 		{
