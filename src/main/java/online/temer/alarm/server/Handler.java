@@ -36,7 +36,7 @@ public abstract class Handler<E> implements Route
 			var connection = connectionProvider.get();
 			final Handler.Response handlerResponse;
 
-			var authenticationResult = authentication.authenticate(connection, parameterReader);
+			var authenticationResult = authentication.authenticate(connection, parameterReader, request, response);
 			if (authenticationResult.entity.isEmpty())
 			{
 				response.status(authenticationResult.errorResponse.getCode());

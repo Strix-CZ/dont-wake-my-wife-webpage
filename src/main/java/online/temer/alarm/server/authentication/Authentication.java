@@ -2,13 +2,15 @@ package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
+import spark.Request;
+import spark.Response;
 
 import java.sql.Connection;
 import java.util.Optional;
 
 public interface Authentication<T>
 {
-	Result<T> authenticate(Connection connection, QueryParameterReader parameterReader);
+	Result<T> authenticate(Connection connection, QueryParameterReader parameterReader, Request request, Response response);
 
 	class Result<T>
 	{

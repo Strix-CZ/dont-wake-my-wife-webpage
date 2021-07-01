@@ -4,7 +4,8 @@ import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.authentication.Authentication;
+import spark.Request;
+import spark.Response;
 
 import java.sql.Connection;
 
@@ -17,7 +18,7 @@ public class UserAuthentication implements Authentication<DeviceDto>
 		this.deviceQuery = deviceQuery;
 	}
 
-	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader queryParameterReader)
+	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader queryParameterReader, Request request, Response response)
 	{
 		// No authorization at the moment. Just return any device.
 		var device = deviceQuery.get(connection);

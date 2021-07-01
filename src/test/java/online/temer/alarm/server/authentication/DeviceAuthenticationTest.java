@@ -1,4 +1,4 @@
-package online.temer.alarm.server.device;
+package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
@@ -7,7 +7,6 @@ import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.IncorrectParameter;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.authentication.DeviceAuthentication;
 import online.temer.alarm.test.util.TimeAssertion;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,7 +109,7 @@ class DeviceAuthenticationTest
 				"hash", "incorrect");
 
 		var timeAssertion = new TimeAssertion();
-		var responseBody = deviceAuthentication.authenticate(connection, parameters).errorResponse.getBody();
+		var responseBody = deviceAuthentication.authenticate(connection, parameters, null, null).errorResponse.getBody();
 		timeAssertion.untilNow();
 
 		LocalDateTime sentTime = LocalDateTime.parse(responseBody.trim(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -119,13 +118,13 @@ class DeviceAuthenticationTest
 
 	private void assertAuthenticationThrowsIncorrectParameter(QueryParameterReader parameters)
 	{
-		Assertions.assertThatThrownBy(() -> deviceAuthentication.authenticate(connection, parameters))
+		Assertions.assertThatThrownBy(() -> deviceAuthentication.authenticate(connection, parameters, null, null))
 				.isInstanceOf(IncorrectParameter.class);
 	}
 
 	private void assertAuthenticationFails(QueryParameterReader parameters, int expectedStatusCode)
 	{
-		Assertions.assertThat(deviceAuthentication.authenticate(connection, parameters).errorResponse)
+		Assertions.assertThat(deviceAuthentication.authenticate(connection, parameters, null, null).errorResponse)
 				.as("error response")
 				.isNotNull()
 				.extracting(Handler.Response::getCode)

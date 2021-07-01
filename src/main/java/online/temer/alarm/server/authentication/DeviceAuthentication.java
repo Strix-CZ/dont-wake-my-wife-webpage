@@ -4,9 +4,9 @@ import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.Handler.Response;
 import online.temer.alarm.server.QueryParameterReader;
-import online.temer.alarm.server.authentication.Authentication;
 import online.temer.alarm.util.DateTimeUtil;
 import online.temer.alarm.util.Hash;
+import spark.Request;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class DeviceAuthentication implements Authentication<DeviceDto>
 		this.deviceQuery = deviceQuery;
 	}
 
-	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader parameterReader)
+	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader parameterReader, Request request, spark.Response response)
 	{
 		long deviceId = parameterReader.readLong("device");
 
@@ -55,7 +55,7 @@ public class DeviceAuthentication implements Authentication<DeviceDto>
 		return Math.abs(time.toEpochSecond() - nowInTimeZoneOfDevice) <= 10;
 	}
 
-	static String calculateHash(Long deviceId, LocalDateTime time, String secretKey)
+	public static String calculateHash(Long deviceId, LocalDateTime time, String secretKey)
 	{
 		return new Hash()
 				.addToMessage(deviceId)
