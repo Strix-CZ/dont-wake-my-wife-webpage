@@ -25,7 +25,7 @@ public class HttpUtil
 		return makeRequest(request);
 	}
 
-	private static HttpResponse<String> makeRequest(HttpRequest request)
+	public static HttpResponse<String> makeRequest(HttpRequest request)
 	{
 		try
 		{
