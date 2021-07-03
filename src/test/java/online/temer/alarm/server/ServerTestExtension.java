@@ -25,13 +25,14 @@ public class ServerTestExtension extends DbTestExtension
 		ConnectionProvider connectionProvider = new TestConnectionProvider();
 		TestAuthentication authentication = new TestAuthentication();
 		AlarmQuery alarmQuery = new AlarmQuery();
+		ExceptionLogger exceptionLogger = new TestExceptionLogger();
 
 		server = new Server(
 				8765,
 				"localhost",
-				new CheckInHandler(authentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider),
-				new GetAlarmHandler(connectionProvider, authentication, alarmQuery),
-				new SetAlarmHandler(connectionProvider, authentication, alarmQuery));
+				new CheckInHandler(authentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
+				new GetAlarmHandler(connectionProvider, authentication, alarmQuery, exceptionLogger),
+				new SetAlarmHandler(connectionProvider, authentication, alarmQuery, exceptionLogger));
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.server.ExceptionLogger;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.server.authentication.Authentication;
@@ -17,9 +18,9 @@ public class SetAlarmHandler extends Handler<DeviceDto>
 {
 	private final AlarmQuery alarmQuery;
 
-	public SetAlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery)
+	public SetAlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, ExceptionLogger exceptionLogger)
 	{
-		super(connectionProvider, authentication);
+		super(connectionProvider, authentication, exceptionLogger);
 		this.alarmQuery = alarmQuery;
 	}
 

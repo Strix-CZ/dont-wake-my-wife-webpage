@@ -6,6 +6,7 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInDto;
 import online.temer.alarm.dto.DeviceCheckInQuery;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.server.ExceptionLogger;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.server.authentication.Authentication;
@@ -20,9 +21,9 @@ public class CheckInHandler extends Handler<DeviceDto>
 	private final AlarmQuery alarmQuery;
 	private final DeviceCheckInQuery deviceCheckInQuery;
 
-	public CheckInHandler(Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider)
+	public CheckInHandler(Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, DeviceCheckInQuery deviceCheckInQuery, ConnectionProvider connectionProvider, ExceptionLogger exceptionLogger)
 	{
-		super(connectionProvider, authentication);
+		super(connectionProvider, authentication, exceptionLogger);
 		this.alarmQuery = alarmQuery;
 		this.deviceCheckInQuery = deviceCheckInQuery;
 	}

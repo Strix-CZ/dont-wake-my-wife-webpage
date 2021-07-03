@@ -13,11 +13,13 @@ public abstract class Handler<E> implements Route
 {
 	private final ConnectionProvider connectionProvider;
 	private final Authentication<E> authentication;
+	private final ExceptionLogger exceptionLogger;
 
-	public Handler(ConnectionProvider connectionProvider, Authentication<E> authentication)
+	public Handler(ConnectionProvider connectionProvider, Authentication<E> authentication, ExceptionLogger exceptionLogger)
 	{
 		this.connectionProvider = connectionProvider;
 		this.authentication = authentication;
+		this.exceptionLogger = exceptionLogger;
 	}
 
 	protected abstract Response handle(E loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection);
@@ -47,6 +49,12 @@ public abstract class Handler<E> implements Route
 		{
 			response.status(e.response.getCode());
 			return e.response.getBody();
+		}
+		catch (Exception e)
+		{
+			exceptionLogger.log(e);
+			response.status(500);
+			return "";
 		}
 	}
 
