@@ -23,6 +23,7 @@ public class Server
 	public void stop()
 	{
 		Spark.stop();
+		Spark.awaitStop();
 	}
 
 	private void createServer(int port, String host)
@@ -33,5 +34,7 @@ public class Server
 		Spark.get("/checkin", checkInHandler);
 		Spark.get("/alarm", getAlarmHandler);
 		Spark.post("/alarm", setAlarmHandler);
+
+		Spark.awaitInitialization();
 	}
 }
