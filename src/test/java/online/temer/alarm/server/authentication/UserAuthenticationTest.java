@@ -18,18 +18,21 @@ import spark.Spark;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Connection;
 
 @ExtendWith(ServerTestExtension.class)
 class UserAuthenticationTest
 {
 	private DeviceQuery deviceQuery;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
 		deviceQuery = new DeviceQuery();
-		UserAuthentication userAuthentication = new UserAuthentication(deviceQuery);
+		connection = new TestConnectionProvider().get();
+		UserAuthentication userAuthentication = new UserAuthentication(new TestUserList(new DeviceQuery()));
 
 		TestAuthentication.setDelegate(userAuthentication);
 
@@ -42,9 +45,73 @@ class UserAuthenticationTest
 		var request = HttpRequest.newBuilder(new URI("http://localhost:8765/alarm")).build();
 		var response = HttpUtil.makeRequest(request);
 
+		assertAuthenticationFailure(response, 401);
+	}
+
+	@Test
+	void garbageInsteadOfBase64_sends401() throws URISyntaxException
+	{
+		var response = makeRequest("garbage");
+
 		Assertions.assertThat(response.statusCode())
 				.as("status code")
-				.isEqualTo(401);
+				.isEqualTo(400);
+	}
+
+	@Test
+	void noColonInRequest_sends401() throws URISyntaxException
+	{
+		var response = makeRequest("am9obmRvZWJhcg=="); // johndoebar
+
+		Assertions.assertThat(response.statusCode())
+				.as("status code")
+				.isEqualTo(400);
+	}
+
+	@Test
+	void wrongUsername_sends403withAuthenticateHeader() throws URISyntaxException
+	{
+		var response = makeRequest("am9obmRvZTpiYXI="); // johndoe:bar
+		assertAuthenticationFailure(response, 403);
+	}
+
+	@Test
+	void wrongPassword_sends403withAuthenticateHeader() throws URISyntaxException
+	{
+		var response = makeRequest("dGVzdHVzZXI6YmxhaA=="); // testuser:blah
+		assertAuthenticationFailure(response, 403);
+	}
+
+	@Test
+	void noDevice_authenticationFails() throws URISyntaxException
+	{
+		var response = makeRequest("dGVzdHVzZXI6YmFy"); // testuser:bar
+
+		Assertions.assertThat(response.statusCode())
+				.as("status code")
+				.isEqualTo(403);
+	}
+
+	@Test
+	void correctRequest_deviceIsReturned() throws URISyntaxException
+	{
+		var device = deviceQuery.generateSaveAndLoadDevice(connection);
+		var response = makeRequest("dGVzdHVzZXI6YmFy"); // testuser:bar
+
+		Assertions.assertThat(response.statusCode())
+				.as("status code")
+				.isEqualTo(200);
+
+		Assertions.assertThat(response.body())
+				.as("body should contain device id")
+				.isEqualTo(Long.toString(device.id));
+	}
+
+	private void assertAuthenticationFailure(HttpResponse<String> response, int expectedStatusCode)
+	{
+		Assertions.assertThat(response.statusCode())
+				.as("status code")
+				.isEqualTo(expectedStatusCode);
 
 		Assertions.assertThat(response.headers().map().get("WWW-Authenticate"))
 				.as("WWW-Authenticate header")
@@ -52,37 +119,25 @@ class UserAuthenticationTest
 				.containsExactly("Basic realm=\"Authenticate to Alarm\", charset=\"UTF-8\"");
 	}
 
-	/*@Test
-	void noDevice_authenticationFails()
+	private HttpResponse<String> makeRequest(String encodedUsernamePassword) throws URISyntaxException
 	{
-		Assertions.assertThat(userAuthentication.authenticate(connection, null, null, null))
-				.as("Device should be present")
-				.extracting(r -> r.entity)
-				.isEqualTo(Optional.empty());
+		var request = HttpRequest.newBuilder(new URI("http://localhost:8765/test"))
+				.header("Authorization", "Basic " + encodedUsernamePassword)
+				.build();
+		return HttpUtil.makeRequest(request);
 	}
-
-	@Test
-	void devicePresentInDb_authenticationReturnsIt()
-	{
-		var deviceDto = deviceQuery.generateSaveAndLoadDevice(connection);
-
-		Assertions.assertThat(userAuthentication.authenticate(connection, null, null, null))
-				.as("Device should be present")
-				.extracting(r -> r.entity)
-				.isEqualTo(Optional.of(deviceDto));
-	}*/
 
 	private class TestHandler extends Handler<DeviceDto>
 	{
 		public TestHandler()
 		{
-			super(new TestConnectionProvider(), new UserAuthentication(deviceQuery), new TestExceptionLogger());
+			super(new TestConnectionProvider(), new UserAuthentication(new TestUserList(deviceQuery)), new TestExceptionLogger());
 		}
 
 		@Override
 		protected Response handle(DeviceDto loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection)
 		{
-			return new Response("authenticated");
+			return new Response(Long.toString(loggedInEntity.id));
 		}
 	}
 }
