@@ -16,8 +16,7 @@ user can get notified when the battery is too low.
 - 1 hard-coded user
 
 ### TODOs
-
-- Authentication method for 1 hard-coded user  
+ 
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
 - Add support for multiple users, 3rd-party based authentication?
