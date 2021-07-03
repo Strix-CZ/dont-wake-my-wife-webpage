@@ -16,16 +16,17 @@ user can get notified when the battery is too low.
 - 1 hard-coded user
 
 ### TODOs
- 
+
+- Add support for multiple users
+- Way how to execute the server (main method)
+- Admin interface to add a user and device (command line?)
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
-- Add support for multiple users, 3rd-party based authentication?
-- Admin interface to add a user and device (command line?)
-- Way how to execute the server (main method)
 - Deployment
 
 ### Ideas
 
+- 3rd party authorization
 - E-mail notification when battery goes low
 - Multiple alarm times
 - Scenario configuration. Example:
