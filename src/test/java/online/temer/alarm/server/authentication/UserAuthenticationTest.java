@@ -10,7 +10,6 @@ import online.temer.alarm.server.TestExceptionLogger;
 import online.temer.alarm.test.util.HttpUtil;
 import online.temer.alarm.util.TestAuthentication;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,31 +19,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.sql.Connection;
-import java.util.Optional;
 
 @ExtendWith(ServerTestExtension.class)
 class UserAuthenticationTest
 {
-	private Connection connection;
 	private DeviceQuery deviceQuery;
-	private UserAuthentication userAuthentication;
 
 	@BeforeEach
 	void setUp()
 	{
-		connection = new TestConnectionProvider().get();
 		deviceQuery = new DeviceQuery();
-		userAuthentication = new UserAuthentication(deviceQuery);
+		UserAuthentication userAuthentication = new UserAuthentication(deviceQuery);
 
 		TestAuthentication.setDelegate(userAuthentication);
 
 		Spark.get("/test", new TestHandler());
-	}
-
-	@AfterEach
-	void tearDown()
-	{
-		Spark.stop();
 	}
 
 	@Test
