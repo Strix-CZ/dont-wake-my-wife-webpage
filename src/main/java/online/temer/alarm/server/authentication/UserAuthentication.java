@@ -8,8 +8,6 @@ import spark.Request;
 import spark.Response;
 
 import java.sql.Connection;
-import java.time.LocalDateTime;
-import java.util.TimeZone;
 
 public class UserAuthentication implements Authentication<DeviceDto>
 {
@@ -22,7 +20,8 @@ public class UserAuthentication implements Authentication<DeviceDto>
 
 	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader queryParameterReader, Request request, Response response)
 	{
-		if (!request.headers().contains("Authorization")) {
+		if (!request.headers().contains("Authorization"))
+		{
 			response.header("WWW-Authenticate", "Basic realm=\"Authenticate to Alarm\"");
 			return new Result<>(new Handler.Response(401));
 		}
