@@ -22,7 +22,7 @@ public class UserAuthentication implements Authentication<DeviceDto>
 	{
 		if (!request.headers().contains("Authorization"))
 		{
-			response.header("WWW-Authenticate", "Basic realm=\"Authenticate to Alarm\"");
+			response.header("WWW-Authenticate", "Basic realm=\"Authenticate to Alarm\", charset=\"UTF-8\"");
 			return new Result<>(new Handler.Response(401));
 		}
 

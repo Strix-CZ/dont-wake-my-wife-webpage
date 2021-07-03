@@ -49,7 +49,7 @@ class UserAuthenticationTest
 		Assertions.assertThat(response.headers().map().get("WWW-Authenticate"))
 				.as("WWW-Authenticate header")
 				.isNotEmpty()
-				.containsExactly("Basic realm=\"Authenticate to Alarm\"");
+				.containsExactly("Basic realm=\"Authenticate to Alarm\", charset=\"UTF-8\"");
 	}
 
 	/*@Test
