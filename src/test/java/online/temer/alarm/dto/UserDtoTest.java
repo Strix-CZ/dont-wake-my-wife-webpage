@@ -50,15 +50,26 @@ public class UserDtoTest
 	void insertingUser_getReturnsIt()
 	{
 		insertUser("john@example.com");
+		UserDto user = userQuery.get(connection, "john@example.com");
 
-		Assertions.assertThat(userQuery.get(connection, "john@example.com"))
-				.isNotNull()
-				.extracting(u -> u.email)
+		Assertions.assertThat(user)
+				.isNotNull();
+
+		Assertions.assertThat(user.email)
+				.as("email")
 				.isEqualTo("john@example.com");
+
+		Assertions.assertThat(user.hash)
+				.as("hash")
+				.isEqualTo("hash");
+
+		Assertions.assertThat(user.salt)
+				.as("salt")
+				.isEqualTo("salt");
 	}
 
 	private long insertUser(String email)
 	{
-		return userQuery.insert(connection, new UserDto(email));
+		return userQuery.insert(connection, new UserDto(email, "hash", "salt"));
 	}
 }

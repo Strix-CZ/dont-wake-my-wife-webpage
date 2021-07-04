@@ -16,7 +16,7 @@ public class UserQuery
 		{
 			return new QueryRunner().query(
 					connection,
-					"SELECT id, email FROM User WHERE email = ?",
+					"SELECT id, email, hash, salt FROM User WHERE email = ?",
 					new UserQuery.Handler(),
 					email);
 		}
@@ -31,10 +31,10 @@ public class UserQuery
 		try
 		{
 			return new QueryRunner().query(connection,
-					"INSERT INTO User(email) "
-							+ "VALUES (?) RETURNING id",
+					"INSERT INTO User(email, hash, salt) "
+							+ "VALUES (?, ?, ?) RETURNING id",
 					new ScalarHandler<>(),
-					userDto.email);
+					userDto.email, userDto.hash, userDto.salt);
 		}
 		catch (SQLException e)
 		{
@@ -69,7 +69,9 @@ public class UserQuery
 
 			return new UserDto(
 					rs.getLong("id"),
-					rs.getString("email")
+					rs.getString("email"),
+					rs.getString("hash"),
+					rs.getString("salt")
 			);
 		}
 	}
