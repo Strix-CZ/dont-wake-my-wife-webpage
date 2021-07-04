@@ -38,7 +38,22 @@ public class UserQuery
 		}
 		catch (SQLException e)
 		{
-			throw new RuntimeException(e);
+			if (e.getErrorCode() == 1062)
+			{
+				throw new DuplicateEmailException("User with the same e-mail already exists.");
+			}
+			else
+			{
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	public static class DuplicateEmailException extends RuntimeException
+	{
+		public DuplicateEmailException(String message)
+		{
+			super(message);
 		}
 	}
 
