@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Connection;
+import java.util.Optional;
 
 @ExtendWith(ServerTestExtension.class)
 class UserAuthenticationTest
@@ -138,6 +139,29 @@ class UserAuthenticationTest
 		protected Response handle(DeviceDto loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection)
 		{
 			return new Response(Long.toString(loggedInEntity.id));
+		}
+	}
+
+	public static class TestUserList implements UserList
+	{
+		private final DeviceQuery deviceQuery;
+
+		public TestUserList(DeviceQuery deviceQuery)
+		{
+			this.deviceQuery = deviceQuery;
+		}
+
+		@Override
+		public Optional<DeviceDto> authenticate(Credentials credentials, Connection connection)
+		{
+			if (credentials.username.equals("testuser") && credentials.password.equals("bar"))
+			{
+				return Optional.ofNullable(deviceQuery.get(connection));
+			}
+			else
+			{
+				return Optional.empty();
+			}
 		}
 	}
 }
