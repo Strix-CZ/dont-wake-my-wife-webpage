@@ -5,10 +5,9 @@ import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
-import online.temer.alarm.server.device.CheckInHandler;
-import online.temer.alarm.server.ui.GetAlarmHandler;
-import online.temer.alarm.server.ui.SetAlarmHandler;
-import online.temer.alarm.util.TestAuthentication;
+import online.temer.alarm.server.handlers.CheckInHandler;
+import online.temer.alarm.server.handlers.GetAlarmHandler;
+import online.temer.alarm.server.handlers.SetAlarmHandler;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.SQLException;

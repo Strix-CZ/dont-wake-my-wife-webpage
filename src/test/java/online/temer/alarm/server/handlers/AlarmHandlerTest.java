@@ -1,4 +1,4 @@
-package online.temer.alarm.server.ui;
+package online.temer.alarm.server.handlers;
 
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
@@ -6,8 +6,8 @@ import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
-import online.temer.alarm.test.util.HttpUtil;
-import online.temer.alarm.util.TestAuthentication;
+import online.temer.alarm.server.HttpUtil;
+import online.temer.alarm.server.TestAuthentication;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;

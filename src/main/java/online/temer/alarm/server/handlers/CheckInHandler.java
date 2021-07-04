@@ -1,4 +1,4 @@
-package online.temer.alarm.server.device;
+package online.temer.alarm.server.handlers;
 
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;

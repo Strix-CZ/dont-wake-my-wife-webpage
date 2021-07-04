@@ -1,8 +1,8 @@
 package online.temer.alarm.server;
 
-import online.temer.alarm.server.device.CheckInHandler;
-import online.temer.alarm.server.ui.GetAlarmHandler;
-import online.temer.alarm.server.ui.SetAlarmHandler;
+import online.temer.alarm.server.handlers.CheckInHandler;
+import online.temer.alarm.server.handlers.GetAlarmHandler;
+import online.temer.alarm.server.handlers.SetAlarmHandler;
 import spark.Spark;
 
 public class Server

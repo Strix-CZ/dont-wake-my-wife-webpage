@@ -1,4 +1,4 @@
-package online.temer.alarm.server.ui;
+package online.temer.alarm.server.handlers;
 
 import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.dto.AlarmDto;
@@ -8,14 +8,17 @@ import online.temer.alarm.server.ExceptionLogger;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.server.authentication.Authentication;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.Connection;
+import java.time.LocalTime;
 
-public class GetAlarmHandler extends Handler<DeviceDto>
+public class SetAlarmHandler extends Handler<DeviceDto>
 {
 	private final AlarmQuery alarmQuery;
 
-	public GetAlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, ExceptionLogger exceptionLogger)
+	public SetAlarmHandler(ConnectionProvider connectionProvider, Authentication<DeviceDto> authentication, AlarmQuery alarmQuery, ExceptionLogger exceptionLogger)
 	{
 		super(connectionProvider, authentication, exceptionLogger);
 		this.alarmQuery = alarmQuery;
@@ -24,16 +27,19 @@ public class GetAlarmHandler extends Handler<DeviceDto>
 	@Override
 	protected Response handle(DeviceDto device, QueryParameterReader parameterReader, String body, Connection connection)
 	{
-		AlarmDto alarm = alarmQuery.get(connection, device.id);
-		if (alarm == null)
+		try
 		{
-			return new Response(200, "{}");
+			var object = new JSONObject(body);
+			var time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
+			var alarmDto = new AlarmDto(device.id, time);
+
+			alarmQuery.insertOrUpdateAlarm(connection, alarmDto);
+
+			return new Response(200);
 		}
-		else
+		catch (JSONException e)
 		{
-			return new Response(200,
-					"{hour:" + alarm.time.getHour() + ","
-							+ "minute:" + alarm.time.getMinute() + "}");
+			return new Response(400, "incorrect JSON");
 		}
 	}
 }

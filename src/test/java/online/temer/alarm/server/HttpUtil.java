@@ -1,4 +1,4 @@
-package online.temer.alarm.test.util;
+package online.temer.alarm.server;
 
 import java.io.IOException;
 import java.net.URI;
