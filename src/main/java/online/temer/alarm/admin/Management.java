@@ -37,8 +37,8 @@ public class Management
 	public String generatePassword()
 	{
 		var random = new SecureRandom();
-		String consonants = "bcdfghjklmnpqrstvwxyz";
-		String vowels = "aeiouy";
+		String consonants = "bcdfghjkmnpqrstvwxz";
+		String vowels = "aeiou";
 
 		String password = "";
 		for (int i = 0; i < 6; ++i)
