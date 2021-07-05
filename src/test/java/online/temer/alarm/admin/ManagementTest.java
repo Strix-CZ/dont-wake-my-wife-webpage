@@ -48,28 +48,28 @@ public class ManagementTest
 	@Test
 	void addingUserWithoutEmail_incorrectArguments()
 	{
-		execute("add");
-		assertFails("Incorrect arguments: add email");
+		execute("addUser");
+		assertFails("Incorrect arguments: addUser john@example.com");
 	}
 
 	@Test
 	void addingUserWithExtraArguments_incorrectArguments()
 	{
-		execute("add", "bla", "ble");
-		assertFails("Incorrect arguments: add email");
+		execute("addUser", "bla", "ble");
+		assertFails("Incorrect arguments: addUser john@example.com");
 	}
 
 	@Test
 	void addingUserWithEmptyEmail_incorrectArguments()
 	{
-		execute("add", "");
-		assertFails("Incorrect arguments: add email");
+		execute("addUser", "");
+		assertFails("Incorrect arguments: addUser john@example.com");
 	}
 
 	@Test
 	void addingUser_success()
 	{
-		execute("add", "john@example.com");
+		execute("addUser", "john@example.com");
 
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
@@ -85,7 +85,7 @@ public class ManagementTest
 	@Test
 	void user_isSavedInDb()
 	{
-		execute("add", "john@example.com");
+		execute("addUser", "john@example.com");
 		var user = userQuery.get(connection, "john@example.com");
 
 		Assertions.assertThat(user)
@@ -100,7 +100,7 @@ public class ManagementTest
 	@Test
 	void user_canLogIn()
 	{
-		execute("add", "john@example.com");
+		execute("addUser", "john@example.com");
 		String password = output.lines.get(0).substring(10);
 
 		var result = userList.authenticate(new UserList.Credentials("john@example.com", password), connection);

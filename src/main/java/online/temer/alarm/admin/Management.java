@@ -18,14 +18,14 @@ public class Management
 
 	public Output execute(String... command)
 	{
-		if (command.length == 0 || !command[0].equals("add"))
+		if (command.length == 0 || !command[0].equals("addUser"))
 		{
 			return new Output(1, "Invalid command");
 		}
 
 		if (command.length != 2 || command[1].isEmpty())
 		{
-			return new Output(1, "Incorrect arguments: add email");
+			return new Output(1, "Incorrect arguments: addUser john@example.com");
 		}
 
 		String password = generatePassword();
