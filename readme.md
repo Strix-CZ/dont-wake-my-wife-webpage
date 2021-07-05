@@ -20,7 +20,8 @@ user can get notified when the battery is too low.
 ### TODOs
 
 - UI
-- Connection pool  
+- ProductionConnectionProvider - are connections getting closed?  
+- Connection pool
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
 - Deployment
