@@ -19,8 +19,9 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- Admin interface to add a user and device (command line?)
 - Way how to execute the server (main method)
+- UI
+- Connection pool  
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
 - Deployment
