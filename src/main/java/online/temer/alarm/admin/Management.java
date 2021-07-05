@@ -52,9 +52,9 @@ public class Management
 
 	private Output addDevice(String[] command)
 	{
-		if (command.length != 1)
+		if (command.length != 2)
 		{
-			return new Output(1, "There are no arguments for addDevice");
+			return new Output(1, "Incorrect arguments: addDevice owner@example.com");
 		}
 
 		return new Output(0,
