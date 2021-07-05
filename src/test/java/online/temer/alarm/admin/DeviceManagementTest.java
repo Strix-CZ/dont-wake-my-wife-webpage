@@ -2,6 +2,9 @@ package online.temer.alarm.admin;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
+import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.dto.UserQuery;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,13 +20,15 @@ public class DeviceManagementTest
 	private Management management;
 	private Connection connection;
 	private UserQuery userQuery;
+	private DeviceQuery deviceQuery;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
 		userQuery = new UserQuery();
-		management = new Management(connection, userQuery);
+		deviceQuery = new DeviceQuery();
+		management = new Management(connection, userQuery, deviceQuery);
 	}
 
 	@Test
@@ -84,6 +89,30 @@ public class DeviceManagementTest
 		Assertions.assertThat(output.lines.get(1))
 				.as("second line")
 				.matches(line -> line.matches("secret: [^ ]+"));
+	}
+
+	@Test
+	void addedDevice_isInDatabase()
+	{
+		UserDto owner = userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
+		execute("addDevice", "john@example.com");
+
+		long id = Long.parseLong(output.lines.get(0).substring(4));
+		String secret = output.lines.get(1).substring(8);
+
+		DeviceDto device = new DeviceQuery().get(connection, id);
+
+		Assertions.assertThat(device)
+				.as("saved device")
+				.isNotNull();
+
+		Assertions.assertThat(device.owner)
+				.as("owner")
+				.isEqualTo(owner.id);
+
+		Assertions.assertThat(device.secretKey)
+				.as("secret key")
+				.isEqualTo(secret);
 	}
 
 	private void execute(String... command)

@@ -2,6 +2,7 @@ package online.temer.alarm.admin;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
+import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.dto.UserQuery;
 import online.temer.alarm.server.authentication.DatabaseUserList;
 import online.temer.alarm.server.authentication.UserList;
@@ -27,7 +28,7 @@ public class UserManagementTest
 	{
 		userQuery = new UserQuery();
 		connection = new TestConnectionProvider().get();
-		management = new Management(connection, userQuery);
+		management = new Management(connection, userQuery, new DeviceQuery());
 		userList = new DatabaseUserList(userQuery);
 	}
 
