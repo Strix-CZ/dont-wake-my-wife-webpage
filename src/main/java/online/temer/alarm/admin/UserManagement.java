@@ -14,6 +14,11 @@ public class UserManagement
 			return new Output(1, "Incorrect arguments: add email");
 		}
 
-		return new Output(0, "password: abcd");
+		return new Output(0, "password: " + generatePassword());
+	}
+
+	public String generatePassword()
+	{
+		return "abcdefghij";
 	}
 }

@@ -1,11 +1,19 @@
 package online.temer.alarm.admin;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class UserManagementTest
 {
 	private Output output;
+	private UserManagement userManagement;
+
+	@BeforeEach
+	void setUp()
+	{
+		userManagement = new UserManagement();
+	}
 
 	@Test
 	void unknownString_invalidCommand()
@@ -57,6 +65,13 @@ public class UserManagementTest
 				.first()
 				.as("password")
 				.matches(s -> s.matches("password: [a-z]+"));
+	}
+
+	@Test
+	void generatingPassword_is10charactersLong()
+	{
+		Assertions.assertThat(userManagement.generatePassword().length())
+				.isEqualTo(10);
 	}
 
 	private void execute(String... command)
