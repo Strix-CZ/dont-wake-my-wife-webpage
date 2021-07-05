@@ -12,8 +12,10 @@ user can get notified when the battery is too low.
 
 ### Current assumptions
 
-- 1 user = 1 device = 1 time of alarm
-- 1 hard-coded user
+- 1 user = 1 device* = 1 time of alarm
+  
+* A user can have multiple devices, but which will be
+  used for Alarm handlers is non-deterministic.
 
 ### TODOs
 
