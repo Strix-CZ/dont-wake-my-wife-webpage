@@ -2,8 +2,7 @@ package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
-import online.temer.alarm.dto.DeviceDto;
-import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.dto.UserQuery;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,17 +21,13 @@ class DatabaseUserListTest
 	private DatabaseUserList databaseUserList;
 	private UserQuery userQuery;
 	private Connection connection;
-	private DeviceDto device;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
 		userQuery = new UserQuery();
-		DeviceQuery deviceQuery = new DeviceQuery();
-		databaseUserList = new DatabaseUserList(userQuery, deviceQuery);
-
-		device = deviceQuery.generateSaveAndLoadDevice(connection);
+		databaseUserList = new DatabaseUserList(userQuery);
 	}
 
 	@Test
@@ -100,16 +95,16 @@ class DatabaseUserListTest
 	void correctCredentials_loginSucceeds()
 	{
 		var user = databaseUserList.createUser("john@example.com", "bar");
-		userQuery.insert(connection, user);
+		long id = userQuery.insert(connection, user);
 
 		Assertions.assertThat(authenticate("john@example.com", "bar"))
 				.isPresent()
 				.get()
-				.extracting(device -> device.id)
-				.isEqualTo(device.id);
+				.extracting(userDto -> userDto.id)
+				.isEqualTo(id);
 	}
 
-	private Optional<DeviceDto> authenticate(String email, String password)
+	private Optional<UserDto> authenticate(String email, String password)
 	{
 		UserList.Credentials credentials = new UserList.Credentials(email, password);
 		return databaseUserList.authenticate(credentials, connection);

@@ -9,7 +9,7 @@ import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.ServerTestExtension;
 import online.temer.alarm.server.HttpUtil;
 import online.temer.alarm.test.util.TimeAssertion;
-import online.temer.alarm.server.TestAuthentication;
+import online.temer.alarm.server.TestDeviceAuthentication;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ public class CheckInTest
 	{
 		connection = new TestConnectionProvider().get();
 		device = new DeviceQuery().generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
-		TestAuthentication.setAuthenticatedDevice(device);
+		TestDeviceAuthentication.setAuthenticatedDevice(device);
 	}
 
 	@Test

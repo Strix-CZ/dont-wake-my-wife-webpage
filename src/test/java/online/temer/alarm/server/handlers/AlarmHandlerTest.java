@@ -5,9 +5,10 @@ import online.temer.alarm.dto.AlarmDto;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
-import online.temer.alarm.server.ServerTestExtension;
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.server.HttpUtil;
-import online.temer.alarm.server.TestAuthentication;
+import online.temer.alarm.server.ServerTestExtension;
+import online.temer.alarm.server.TestUserAuthentication;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,7 @@ class AlarmHandlerTest
 	{
 		connection = new TestConnectionProvider().get();
 		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
-		TestAuthentication.setAuthenticatedDevice(device);
+		TestUserAuthentication.setAuthenticatedUser(new UserDto("john@example.com", "hash", "salt"));
 	}
 
 	@Test

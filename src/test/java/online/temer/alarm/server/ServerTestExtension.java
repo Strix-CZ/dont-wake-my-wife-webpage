@@ -5,6 +5,7 @@ import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
+import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.server.handlers.CheckInHandler;
 import online.temer.alarm.server.handlers.GetAlarmHandler;
 import online.temer.alarm.server.handlers.SetAlarmHandler;
@@ -22,16 +23,18 @@ public class ServerTestExtension extends DbTestExtension
 		super.beforeAll(context);
 
 		ConnectionProvider connectionProvider = new TestConnectionProvider();
-		TestAuthentication authentication = new TestAuthentication();
+		TestDeviceAuthentication deviceAuthentication = new TestDeviceAuthentication();
+		TestUserAuthentication userAuthentication = new TestUserAuthentication();
 		AlarmQuery alarmQuery = new AlarmQuery();
+		DeviceQuery deviceQuery = new DeviceQuery();
 		ExceptionLogger exceptionLogger = new TestExceptionLogger();
 
 		server = new Server(
 				8765,
 				"localhost",
-				new CheckInHandler(authentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
-				new GetAlarmHandler(connectionProvider, authentication, alarmQuery, exceptionLogger),
-				new SetAlarmHandler(connectionProvider, authentication, alarmQuery, exceptionLogger));
+				new CheckInHandler(deviceAuthentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
+				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery),
+				new SetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery));
 	}
 
 	@Override
@@ -39,7 +42,8 @@ public class ServerTestExtension extends DbTestExtension
 	{
 		super.afterEach(extensionContext);
 
-		TestAuthentication.setAuthenticationUndefined();
+		TestDeviceAuthentication.setAuthenticationUndefined();
+		TestUserAuthentication.setAuthenticationUndefined();
 	}
 
 	@Override

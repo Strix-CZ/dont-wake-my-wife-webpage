@@ -19,16 +19,14 @@ import java.util.Optional;
 public class DatabaseUserList implements UserList
 {
 	private final UserQuery userQuery;
-	private final DeviceQuery deviceQuery;
 
-	public DatabaseUserList(UserQuery userQuery, DeviceQuery deviceQuery)
+	public DatabaseUserList(UserQuery userQuery)
 	{
 		this.userQuery = userQuery;
-		this.deviceQuery = deviceQuery;
 	}
 
 	@Override
-	public Optional<DeviceDto> authenticate(Credentials credentials, Connection connection)
+	public Optional<UserDto> authenticate(Credentials credentials, Connection connection)
 	{
 		UserDto user = userQuery.get(connection, credentials.username);
 		if (user == null)
@@ -39,7 +37,7 @@ public class DatabaseUserList implements UserList
 		String hash = getHash(credentials.password, user.salt);
 		if (user.hash.equals(hash))
 		{
-			return Optional.ofNullable(deviceQuery.get(connection));
+			return Optional.of(user);
 		}
 		else
 		{

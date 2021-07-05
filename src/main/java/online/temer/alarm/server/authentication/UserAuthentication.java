@@ -1,6 +1,6 @@
 package online.temer.alarm.server.authentication;
 
-import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.server.Handler;
 import online.temer.alarm.server.IncorrectRequest;
 import online.temer.alarm.server.QueryParameterReader;
@@ -12,7 +12,7 @@ import java.sql.Connection;
 import java.util.Base64;
 import java.util.Optional;
 
-public class UserAuthentication implements Authentication<DeviceDto>
+public class UserAuthentication implements Authentication<UserDto>
 {
 	private final UserList userList;
 
@@ -21,7 +21,7 @@ public class UserAuthentication implements Authentication<DeviceDto>
 		this.userList = userList;
 	}
 
-	public Result<DeviceDto> authenticate(Connection connection, QueryParameterReader queryParameterReader, Request request, Response response)
+	public Result<UserDto> authenticate(Connection connection, QueryParameterReader queryParameterReader, Request request, Response response)
 	{
 		if (!request.headers().contains("Authorization"))
 		{
@@ -29,15 +29,15 @@ public class UserAuthentication implements Authentication<DeviceDto>
 		}
 
 		UserList.Credentials credentials = getCredentials(request.headers("Authorization"));
-		Optional<DeviceDto> usersDevice = userList.authenticate(credentials, connection);
+		Optional<UserDto> user = userList.authenticate(credentials, connection);
 
-		if (usersDevice.isEmpty())
+		if (user.isEmpty())
 		{
 			return makeAuthorizationRequest(response, 403);
 		}
 		else
 		{
-			return new Result<>(usersDevice.get());
+			return new Result<>(user.get());
 		}
 	}
 
@@ -58,7 +58,7 @@ public class UserAuthentication implements Authentication<DeviceDto>
 		return new UserList.Credentials(username, password);
 	}
 
-	private Result<DeviceDto> makeAuthorizationRequest(Response response, int code)
+	private Result<UserDto> makeAuthorizationRequest(Response response, int code)
 	{
 		response.header("WWW-Authenticate", "Basic realm=\"Authenticate to Alarm\", charset=\"UTF-8\"");
 		return new Result<>(new Handler.Response(code));

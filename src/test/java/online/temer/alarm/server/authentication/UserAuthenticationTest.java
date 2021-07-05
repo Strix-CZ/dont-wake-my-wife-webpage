@@ -1,14 +1,13 @@
 package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.db.TestConnectionProvider;
-import online.temer.alarm.dto.DeviceDto;
-import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.server.Handler;
+import online.temer.alarm.server.HttpUtil;
 import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.server.ServerTestExtension;
 import online.temer.alarm.server.TestExceptionLogger;
-import online.temer.alarm.server.HttpUtil;
-import online.temer.alarm.server.TestAuthentication;
+import online.temer.alarm.server.TestUserAuthentication;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,17 +24,12 @@ import java.util.Optional;
 @ExtendWith(ServerTestExtension.class)
 class UserAuthenticationTest
 {
-	private DeviceQuery deviceQuery;
-	private Connection connection;
-
 	@BeforeEach
 	void setUp()
 	{
-		deviceQuery = new DeviceQuery();
-		connection = new TestConnectionProvider().get();
-		UserAuthentication userAuthentication = new UserAuthentication(new TestUserList(new DeviceQuery()));
+		UserAuthentication userAuthentication = new UserAuthentication(new TestUserList());
 
-		TestAuthentication.setDelegate(userAuthentication);
+		TestUserAuthentication.setDelegate(userAuthentication);
 
 		Spark.get("/test", new TestHandler());
 	}
@@ -84,19 +78,8 @@ class UserAuthenticationTest
 	}
 
 	@Test
-	void noDevice_authenticationFails() throws URISyntaxException
-	{
-		var response = makeRequest("dGVzdHVzZXI6YmFy"); // testuser:bar
-
-		Assertions.assertThat(response.statusCode())
-				.as("status code")
-				.isEqualTo(403);
-	}
-
-	@Test
 	void correctRequest_deviceIsReturned() throws URISyntaxException
 	{
-		var device = deviceQuery.generateSaveAndLoadDevice(connection);
 		var response = makeRequest("dGVzdHVzZXI6YmFy"); // testuser:bar
 
 		Assertions.assertThat(response.statusCode())
@@ -104,8 +87,8 @@ class UserAuthenticationTest
 				.isEqualTo(200);
 
 		Assertions.assertThat(response.body())
-				.as("body should contain device id")
-				.isEqualTo(Long.toString(device.id));
+				.as("body was not sent")
+				.isEqualTo("OK");
 	}
 
 	private void assertAuthenticationFailure(HttpResponse<String> response, int expectedStatusCode)
@@ -128,35 +111,28 @@ class UserAuthenticationTest
 		return HttpUtil.makeRequest(request);
 	}
 
-	private class TestHandler extends Handler<DeviceDto>
+	private static class TestHandler extends Handler<UserDto>
 	{
 		public TestHandler()
 		{
-			super(new TestConnectionProvider(), new UserAuthentication(new TestUserList(deviceQuery)), new TestExceptionLogger());
+			super(new TestConnectionProvider(), new UserAuthentication(new TestUserList()), new TestExceptionLogger());
 		}
 
 		@Override
-		protected Response handle(DeviceDto loggedInEntity, QueryParameterReader parameterReader, String body, Connection connection)
+		protected Response handle(UserDto entity, QueryParameterReader parameterReader, String body, Connection connection)
 		{
-			return new Response(Long.toString(loggedInEntity.id));
+			return new Response("OK");
 		}
 	}
 
 	public static class TestUserList implements UserList
 	{
-		private final DeviceQuery deviceQuery;
-
-		public TestUserList(DeviceQuery deviceQuery)
-		{
-			this.deviceQuery = deviceQuery;
-		}
-
 		@Override
-		public Optional<DeviceDto> authenticate(Credentials credentials, Connection connection)
+		public Optional<UserDto> authenticate(Credentials credentials, Connection connection)
 		{
 			if (credentials.username.equals("testuser") && credentials.password.equals("bar"))
 			{
-				return Optional.ofNullable(deviceQuery.get(connection));
+				return Optional.of(new UserDto("testuser", "hash", "salt"));
 			}
 			else
 			{
