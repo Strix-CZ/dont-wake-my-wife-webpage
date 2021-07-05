@@ -42,6 +42,17 @@ public class UserManagementTest
 		assertFails("Incorrect arguments: add email");
 	}
 
+
+	@Test
+	void addingUser_success()
+	{
+		execute("add", "john@example.com");
+
+		Assertions.assertThat(output.exitCode)
+				.as("exit code")
+				.isEqualTo(0);
+	}
+
 	private void execute(String... command)
 	{
 		output = new UserManagement().execute(command);
