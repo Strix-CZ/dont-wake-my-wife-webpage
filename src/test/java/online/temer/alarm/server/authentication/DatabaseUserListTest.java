@@ -1,10 +1,12 @@
 package online.temer.alarm.server.authentication;
 
+import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.DeviceDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
 import java.util.Base64;
@@ -12,6 +14,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+@ExtendWith(DbTestExtension.class)
 class DatabaseUserListTest
 {
 	private DatabaseUserList databaseUserList;
@@ -60,7 +63,7 @@ class DatabaseUserListTest
 		String hash = databaseUserList.getHash("password", "salt");
 
 		Assertions.assertThat(hash)
-				.isEqualTo("aggKy9xmpThOnK+LmGLFjT83oPaO35Ta3pLD9wqQf2AkCiA70y4ESRfsh4787ydmK7quRI1nwW+4IVibLO61ig==");
+				.isEqualTo("JZrW7V2byWXXSW+It3cpIeFoILSEhopgjy9kiIe9mU1CU1Wx2MSEDo7DcHuN+dBdAL1bNKKNDtSe74Nj0cZyFA==");
 	}
 
 	private Optional<DeviceDto> authenticate()

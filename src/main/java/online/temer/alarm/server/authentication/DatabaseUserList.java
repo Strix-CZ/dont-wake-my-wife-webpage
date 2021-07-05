@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class DatabaseUserList implements UserList
 {
-	static SecureRandom random;
 
 	@Override
 	public Optional<DeviceDto> authenticate(Credentials credentials, Connection connection)
@@ -25,26 +24,16 @@ public class DatabaseUserList implements UserList
 
 	String generateSalt()
 	{
-		makeSureRandomIsInstantiated();
-
 		byte[] salt = new byte[64];
-		random.nextBytes(salt);
+		new SecureRandom().nextBytes(salt);
 		return Base64.getEncoder().encodeToString(salt);
-	}
-
-	synchronized private void makeSureRandomIsInstantiated()
-	{
-		if (random == null)
-		{
-			random = new SecureRandom();
-		}
 	}
 
 	public String getHash(String password, String salt)
 	{
 		try
 		{
-			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(StandardCharsets.UTF_8), 49847, 512);
+			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(StandardCharsets.UTF_8), 9847, 512);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 			byte[] hash = factory.generateSecret(spec).getEncoded();
 			return Base64.getEncoder().encodeToString(hash);
