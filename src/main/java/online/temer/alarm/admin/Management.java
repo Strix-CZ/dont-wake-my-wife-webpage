@@ -18,11 +18,27 @@ public class Management
 
 	public Output execute(String... command)
 	{
-		if (command.length == 0 || !command[0].equals("addUser"))
+		if (command.length == 0)
 		{
-			return new Output(1, "Invalid command");
+			return invalidCommand();
 		}
 
+		if (command[0].equals("addUser"))
+		{
+			return addUser(command);
+		}
+		else if (command[0].equals("addDevice"))
+		{
+			return addDevice(command);
+		}
+		else
+		{
+			return invalidCommand();
+		}
+	}
+
+	private Output addUser(String[] command)
+	{
 		if (command.length != 2 || command[1].isEmpty())
 		{
 			return new Output(1, "Incorrect arguments: addUser john@example.com");
@@ -32,6 +48,11 @@ public class Management
 		userQuery.createInsertAndLoadUser(connection, command[1], password);
 
 		return new Output(0, "password: " + password);
+	}
+
+	private Output addDevice(String[] command)
+	{
+		return new Output(1, "There are no arguments for addDevice");
 	}
 
 	public String generatePassword()
@@ -62,5 +83,10 @@ public class Management
 		}
 
 		return password;
+	}
+
+	private Output invalidCommand()
+	{
+		return new Output(1, "Invalid command");
 	}
 }
