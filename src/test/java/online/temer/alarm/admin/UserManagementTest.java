@@ -20,7 +20,7 @@ public class UserManagementTest
 	}
 
 	@Test
-	void addingUserWithoutEmail_returns1()
+	void addingUserWithoutEmail_incorrectArguments()
 	{
 		Output output = execute("add");
 		assertFails(output, "Incorrect arguments: add email");
