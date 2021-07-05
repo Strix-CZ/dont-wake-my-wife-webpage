@@ -39,6 +39,13 @@
 			<version>20210307</version>
 		</dependency>
 
+		<!-- This controls logging of the server, see http://www.slf4j.org/codes.html#StaticLoggerBinder -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>1.7.31</version>
+		</dependency>
+
 		<dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
