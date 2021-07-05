@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 @ExtendWith(DbTestExtension.class)
 public class UserDtoTest
@@ -66,6 +69,40 @@ public class UserDtoTest
 		Assertions.assertThat(user.salt)
 				.as("salt")
 				.isEqualTo("salt");
+	}
+
+	@Test
+	void salt_is64BytesLong()
+	{
+		String salt = UserQuery.generateSalt();
+		int saltLength = Base64.getDecoder().decode(salt).length;
+
+		Assertions.assertThat(saltLength)
+				.isEqualTo(64);
+	}
+
+	@Test
+	void salt_isAlwaysDifferent()
+	{
+		int attempts = 1000;
+
+		Set<String> salts = new HashSet<>(attempts);
+		for (int i = 0; i < attempts; i++)
+		{
+			salts.add(UserQuery.generateSalt());
+		}
+
+		Assertions.assertThat(salts.size())
+				.isEqualTo(attempts);
+	}
+
+	@Test
+	void testHash()
+	{
+		String hash = UserQuery.getHash("password", "salt");
+
+		Assertions.assertThat(hash)
+				.isEqualTo("JZrW7V2byWXXSW+It3cpIeFoILSEhopgjy9kiIe9mU1CU1Wx2MSEDo7DcHuN+dBdAL1bNKKNDtSe74Nj0cZyFA==");
 	}
 
 	private long insertUser(String email)

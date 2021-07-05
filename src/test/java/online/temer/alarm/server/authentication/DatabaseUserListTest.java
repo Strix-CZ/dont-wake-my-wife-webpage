@@ -10,10 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
-import java.util.Base64;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @ExtendWith(DbTestExtension.class)
 class DatabaseUserListTest
@@ -38,43 +35,9 @@ class DatabaseUserListTest
 	}
 
 	@Test
-	void salt_is64BytesLong()
-	{
-		String salt = databaseUserList.generateSalt();
-		int saltLength = Base64.getDecoder().decode(salt).length;
-
-		Assertions.assertThat(saltLength)
-				.isEqualTo(64);
-	}
-
-	@Test
-	void salt_isAlwaysDifferent()
-	{
-		int attempts = 1000;
-
-		Set<String> salts = new HashSet<>(attempts);
-		for (int i = 0; i < attempts; i++)
-		{
-			salts.add(databaseUserList.generateSalt());
-		}
-
-		Assertions.assertThat(salts.size())
-				.isEqualTo(attempts);
-	}
-
-	@Test
-	void testHash()
-	{
-		String hash = databaseUserList.getHash("password", "salt");
-
-		Assertions.assertThat(hash)
-				.isEqualTo("JZrW7V2byWXXSW+It3cpIeFoILSEhopgjy9kiIe9mU1CU1Wx2MSEDo7DcHuN+dBdAL1bNKKNDtSe74Nj0cZyFA==");
-	}
-
-	@Test
 	void incorrectEmail_loginFails()
 	{
-		var user = databaseUserList.createUser("john@example.com", "bar");
+		var user = UserQuery.createUser("john@example.com", "bar");
 		userQuery.insert(connection, user);
 
 		Assertions.assertThat(authenticate("wrong@example.com", "bar"))
@@ -84,7 +47,7 @@ class DatabaseUserListTest
 	@Test
 	void incorrectPassword_loginFails()
 	{
-		var user = databaseUserList.createUser("john@example.com", "bar");
+		var user = UserQuery.createUser("john@example.com", "bar");
 		userQuery.insert(connection, user);
 
 		Assertions.assertThat(authenticate("john@example.com", "wrong"))
@@ -94,7 +57,7 @@ class DatabaseUserListTest
 	@Test
 	void correctCredentials_loginSucceeds()
 	{
-		var user = databaseUserList.createUser("john@example.com", "bar");
+		var user = UserQuery.createUser("john@example.com", "bar");
 		long id = userQuery.insert(connection, user);
 
 		Assertions.assertThat(authenticate("john@example.com", "bar"))

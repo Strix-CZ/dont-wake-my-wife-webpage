@@ -4,9 +4,17 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 
 public class UserQuery
 {
@@ -46,6 +54,36 @@ public class UserQuery
 			{
 				throw new RuntimeException(e);
 			}
+		}
+	}
+
+	public static UserDto createUser(String email, String password)
+	{
+		String salt = generateSalt();
+		String hash = getHash(password, salt);
+
+		return new UserDto(email, hash, salt);
+	}
+
+	public static String generateSalt()
+	{
+		byte[] salt = new byte[64];
+		new SecureRandom().nextBytes(salt);
+		return Base64.getEncoder().encodeToString(salt);
+	}
+
+	public static String getHash(String password, String salt)
+	{
+		try
+		{
+			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(StandardCharsets.UTF_8), 9847, 512);
+			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			byte[] hash = factory.generateSecret(spec).getEncoded();
+			return Base64.getEncoder().encodeToString(hash);
+		}
+		catch (NoSuchAlgorithmException | InvalidKeySpecException e)
+		{
+			throw new RuntimeException(e);
 		}
 	}
 
