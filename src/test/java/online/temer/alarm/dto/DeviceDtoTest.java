@@ -65,16 +65,6 @@ class DeviceDtoTest
 	}
 
 	@Test
-	void whenThereAreMultipleDevices_getWithoutIdReturnsAnyOfThem()
-	{
-		deviceQuery.generateSaveAndLoadDevice(connection);
-		deviceQuery.generateSaveAndLoadDevice(connection);
-
-		Assertions.assertThat(deviceQuery.get(connection))
-				.isNotNull();
-	}
-
-	@Test
 	void testGettingDeviceByOwner()
 	{
 		var user = userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");

@@ -34,7 +34,7 @@ class DeviceAuthenticationTest
 		DeviceQuery deviceQuery = new DeviceQuery();
 		deviceAuthentication = new DeviceAuthentication(deviceQuery);
 
-		device = deviceQuery.generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
+		device = deviceQuery.generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")), null);
 	}
 
 	@Test

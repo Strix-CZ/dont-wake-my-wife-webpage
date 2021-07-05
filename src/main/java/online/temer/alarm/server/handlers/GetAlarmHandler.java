@@ -12,6 +12,7 @@ import online.temer.alarm.server.QueryParameterReader;
 import online.temer.alarm.server.authentication.Authentication;
 
 import java.sql.Connection;
+import java.util.List;
 
 public class GetAlarmHandler extends Handler<UserDto>
 {
@@ -28,11 +29,12 @@ public class GetAlarmHandler extends Handler<UserDto>
 	@Override
 	protected Response handle(UserDto user, QueryParameterReader parameterReader, String body, Connection connection)
 	{
-		DeviceDto device = deviceQuery.get(connection);
-		if (device == null)
+		List<DeviceDto> deviceList = deviceQuery.getByOwner(connection, user.id);
+		if (deviceList.isEmpty())
 		{
 			return new Response(400);
 		}
+		DeviceDto device = deviceList.get(0);
 
 		AlarmDto alarm = alarmQuery.get(connection, device.id);
 		if (alarm == null)

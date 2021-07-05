@@ -16,12 +16,17 @@ public class DeviceQuery
 {
 	public DeviceDto generateSaveAndLoadDevice(Connection connection)
 	{
-		return generateSaveAndLoadDevice(connection, TimeZone.getDefault());
+		return generateSaveAndLoadDevice(connection, TimeZone.getDefault(), null);
 	}
 
-	public DeviceDto generateSaveAndLoadDevice(Connection connection, TimeZone timeZone)
+	public DeviceDto generateSaveAndLoadDevice(Connection connection, long owner)
 	{
-		long id = insertDevice(connection, DeviceDto.generateDevice(timeZone));
+		return generateSaveAndLoadDevice(connection, TimeZone.getDefault(), owner);
+	}
+
+	public DeviceDto generateSaveAndLoadDevice(Connection connection, TimeZone timeZone, Long owner)
+	{
+		long id = insertDevice(connection, DeviceDto.generateDevice(timeZone, owner));
 		return get(connection, id);
 	}
 
@@ -66,21 +71,6 @@ public class DeviceQuery
 					"SELECT * FROM Device WHERE kOwner = ?",
 					new ListResultSetHandler<>(new Handler()),
 					owner);
-		}
-		catch (SQLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	public DeviceDto get(Connection connection)
-	{
-		try
-		{
-			return new QueryRunner().query(
-					connection,
-					"SELECT * FROM Device",
-					new Handler());
 		}
 		catch (SQLException e)
 		{

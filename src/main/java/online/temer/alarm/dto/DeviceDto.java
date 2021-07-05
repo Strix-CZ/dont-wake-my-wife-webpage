@@ -47,10 +47,10 @@ public class DeviceDto
 
 	public static DeviceDto generateDevice()
 	{
-		return generateDevice(TimeZone.getDefault());
+		return generateDevice(TimeZone.getDefault(), null);
 	}
 
-	public static DeviceDto generateDevice(TimeZone timeZone)
+	public static DeviceDto generateDevice(TimeZone timeZone, Long owner)
 	{
 		String possibleLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
 
@@ -63,6 +63,6 @@ public class DeviceDto
 				LocalDateTime.now(),
 				timeZone,
 				secretKey,
-				null);
+				owner);
 	}
 }

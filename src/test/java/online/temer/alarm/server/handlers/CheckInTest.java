@@ -34,7 +34,7 @@ public class CheckInTest
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		device = new DeviceQuery().generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")));
+		device = new DeviceQuery().generateSaveAndLoadDevice(connection, TimeZone.getTimeZone(ZoneId.of("Asia/Hong_Kong")), null);
 		TestDeviceAuthentication.setAuthenticatedDevice(device);
 	}
 

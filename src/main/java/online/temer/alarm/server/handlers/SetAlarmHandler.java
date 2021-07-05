@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.time.LocalTime;
+import java.util.List;
 
 public class SetAlarmHandler extends Handler<UserDto>
 {
@@ -31,11 +32,12 @@ public class SetAlarmHandler extends Handler<UserDto>
 	@Override
 	protected Response handle(UserDto user, QueryParameterReader parameterReader, String body, Connection connection)
 	{
-		DeviceDto device = deviceQuery.get(connection);
-		if (device == null)
+		List<DeviceDto> deviceList = deviceQuery.getByOwner(connection, user.id);
+		if (deviceList.isEmpty())
 		{
 			return new Response(400);
 		}
+		DeviceDto device = deviceList.get(0);
 
 		try
 		{
