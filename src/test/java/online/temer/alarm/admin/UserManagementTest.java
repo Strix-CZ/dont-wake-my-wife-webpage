@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 public class UserManagementTest
 {
 	@Test
-	void invalidCommand_returns1()
+	void unknownString_invalidCommand()
 	{
 		Output output = execute("invalid");
 		assertFails(output, "Invalid command");
