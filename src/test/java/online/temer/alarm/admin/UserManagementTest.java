@@ -33,6 +33,13 @@ public class UserManagementTest
 		assertFails(output, "Incorrect arguments: add email");
 	}
 
+	@Test
+	void addingUserWithEmptyEmail_incorrectArguments()
+	{
+		Output output = execute("add", "");
+		assertFails(output, "Incorrect arguments: add email");
+	}
+
 	private Output execute(String... command)
 	{
 		return new UserManagement().execute(command);
