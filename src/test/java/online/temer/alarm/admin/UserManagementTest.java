@@ -3,6 +3,8 @@ package online.temer.alarm.admin;
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.UserQuery;
+import online.temer.alarm.server.authentication.DatabaseUserList;
+import online.temer.alarm.server.authentication.UserList;
 import online.temer.alarm.test.util.TestUniqueness;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,7 @@ public class UserManagementTest
 	private UserManagement userManagement;
 	private UserQuery userQuery;
 	private Connection connection;
+	private DatabaseUserList userList;
 
 	@BeforeEach
 	void setUp()
@@ -25,6 +28,7 @@ public class UserManagementTest
 		userQuery = new UserQuery();
 		connection = new TestConnectionProvider().get();
 		userManagement = new UserManagement(connection, userQuery);
+		userList = new DatabaseUserList(userQuery);
 	}
 
 	@Test
@@ -91,6 +95,18 @@ public class UserManagementTest
 		Assertions.assertThat(user.email)
 				.as("email")
 				.isEqualTo("john@example.com");
+	}
+
+	@Test
+	void user_canLogIn()
+	{
+		execute("add", "john@example.com");
+		String password = output.lines.get(0).substring(10);
+
+		var result = userList.authenticate(new UserList.Credentials("john@example.com", password), connection);
+		Assertions.assertThat(result)
+				.as("Login result")
+				.isPresent();
 	}
 
 	@Test
