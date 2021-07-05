@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.sql.Connection;
 
 @ExtendWith(DbTestExtension.class)
-public class ManagementTest
+public class UserManagementTest
 {
 	private Output output;
 	private Management management;
