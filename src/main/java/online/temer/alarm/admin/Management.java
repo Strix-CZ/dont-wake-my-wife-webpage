@@ -5,12 +5,12 @@ import online.temer.alarm.dto.UserQuery;
 import java.security.SecureRandom;
 import java.sql.Connection;
 
-public class UserManagement
+public class Management
 {
 	private final Connection connection;
 	private final UserQuery userQuery;
 
-	public UserManagement(Connection connection, UserQuery userQuery)
+	public Management(Connection connection, UserQuery userQuery)
 	{
 		this.connection = connection;
 		this.userQuery = userQuery;

@@ -14,10 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.sql.Connection;
 
 @ExtendWith(DbTestExtension.class)
-public class UserManagementTest
+public class ManagementTest
 {
 	private Output output;
-	private UserManagement userManagement;
+	private Management management;
 	private UserQuery userQuery;
 	private Connection connection;
 	private DatabaseUserList userList;
@@ -27,7 +27,7 @@ public class UserManagementTest
 	{
 		userQuery = new UserQuery();
 		connection = new TestConnectionProvider().get();
-		userManagement = new UserManagement(connection, userQuery);
+		management = new Management(connection, userQuery);
 		userList = new DatabaseUserList(userQuery);
 	}
 
@@ -112,19 +112,19 @@ public class UserManagementTest
 	@Test
 	void generatingPassword_is10charactersLong()
 	{
-		Assertions.assertThat(userManagement.generatePassword().length())
+		Assertions.assertThat(management.generatePassword().length())
 				.isEqualTo(12);
 	}
 
 	@Test
 	void generatedPassword_isRandom()
 	{
-		TestUniqueness.assertUniqueness(1000, () -> userManagement.generatePassword());
+		TestUniqueness.assertUniqueness(1000, () -> management.generatePassword());
 	}
 
 	private void execute(String... command)
 	{
-		output = userManagement.execute(command);
+		output = management.execute(command);
 	}
 
 	private void assertFails(String expectedMessage)
