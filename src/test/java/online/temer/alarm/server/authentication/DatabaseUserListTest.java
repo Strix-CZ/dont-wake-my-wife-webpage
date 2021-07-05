@@ -42,12 +42,25 @@ class DatabaseUserListTest
 	@Test
 	void salt_isAlwaysDifferent()
 	{
-		Set<String> salts = new HashSet<>(100);
-		for (int i = 0; i < 100; i++)
+		int attempts = 1000;
+
+		Set<String> salts = new HashSet<>(attempts);
+		for (int i = 0; i < attempts; i++)
+		{
 			salts.add(databaseUserList.generateSalt());
+		}
 
 		Assertions.assertThat(salts.size())
-				.isEqualTo(100);
+				.isEqualTo(attempts);
+	}
+
+	@Test
+	void testHash()
+	{
+		String hash = databaseUserList.getHash("password", "salt");
+
+		Assertions.assertThat(hash)
+				.isEqualTo("aggKy9xmpThOnK+LmGLFjT83oPaO35Ta3pLD9wqQf2AkCiA70y4ESRfsh4787ydmK7quRI1nwW+4IVibLO61ig==");
 	}
 
 	private Optional<DeviceDto> authenticate()
