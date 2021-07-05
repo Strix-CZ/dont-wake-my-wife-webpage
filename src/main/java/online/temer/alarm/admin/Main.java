@@ -6,8 +6,6 @@ import online.temer.alarm.dto.UserQuery;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 
 public class Main
 {
@@ -18,11 +16,10 @@ public class Main
 		{
 			var management = new Management(connection, new UserQuery(), new DeviceQuery());
 
-			List<String> arguments = Arrays.asList(args);
-			arguments.remove(0);
-			arguments.remove(0);
+			Output output = management.execute(args);
 
-			management.execute(arguments.toArray(String[]::new));
+			System.out.println(String.join("\n", output.lines));
+			System.exit(output.exitCode);
 		}
 		catch (SQLException e)
 		{
