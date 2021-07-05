@@ -1,5 +1,8 @@
 package online.temer.alarm.admin;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 public class UserManagement
 {
 	public Output execute(String... command)
@@ -19,6 +22,17 @@ public class UserManagement
 
 	public String generatePassword()
 	{
-		return "abcdefghij";
+		var random = new SecureRandom();
+		String consonants = "bcdfghjklmnpqrstvwxyz";
+		String vowels = "aeiouy";
+
+		String password = "";
+		for (int i = 0; i < 6; ++i)
+		{
+			password += "" + consonants.charAt(random.nextInt(consonants.length()))
+					  + vowels.charAt(random.nextInt(vowels.length()));
+		}
+
+		return password;
 	}
 }
