@@ -1,9 +1,6 @@
 package online.temer.alarm.admin;
 
-import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.dto.UserQuery;
-import online.temer.alarm.server.authentication.DatabaseUserList;
-import online.temer.alarm.server.authentication.UserList;
 
 import java.security.SecureRandom;
 import java.sql.Connection;
@@ -47,7 +44,7 @@ public class UserManagement
 		for (int i = 0; i < 6; ++i)
 		{
 			password += "" + consonants.charAt(random.nextInt(consonants.length()))
-					  + vowels.charAt(random.nextInt(vowels.length()));
+					+ vowels.charAt(random.nextInt(vowels.length()));
 		}
 
 		return password;
