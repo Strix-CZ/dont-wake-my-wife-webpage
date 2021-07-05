@@ -13,6 +13,13 @@ public class UserManagementTest
 	}
 
 	@Test
+	void noArguments_invalidCommand()
+	{
+		Output output = execute();
+		assertFails(output, "Invalid command");
+	}
+
+	@Test
 	void addingUserWithoutEmail_returns1()
 	{
 		Output output = execute("add");
