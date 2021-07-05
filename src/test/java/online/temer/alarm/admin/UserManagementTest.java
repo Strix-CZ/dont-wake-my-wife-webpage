@@ -5,47 +5,49 @@ import org.junit.jupiter.api.Test;
 
 public class UserManagementTest
 {
+	private Output output;
+
 	@Test
 	void unknownString_invalidCommand()
 	{
-		Output output = execute("invalid");
-		assertFails(output, "Invalid command");
+		execute("invalid");
+		assertFails("Invalid command");
 	}
 
 	@Test
 	void noArguments_invalidCommand()
 	{
-		Output output = execute();
-		assertFails(output, "Invalid command");
+		execute();
+		assertFails("Invalid command");
 	}
 
 	@Test
 	void addingUserWithoutEmail_incorrectArguments()
 	{
-		Output output = execute("add");
-		assertFails(output, "Incorrect arguments: add email");
+		execute("add");
+		assertFails("Incorrect arguments: add email");
 	}
 
 	@Test
 	void addingUserWithExtraArguments_incorrectArguments()
 	{
-		Output output = execute("add", "bla", "ble");
-		assertFails(output, "Incorrect arguments: add email");
+		execute("add", "bla", "ble");
+		assertFails("Incorrect arguments: add email");
 	}
 
 	@Test
 	void addingUserWithEmptyEmail_incorrectArguments()
 	{
-		Output output = execute("add", "");
-		assertFails(output, "Incorrect arguments: add email");
+		execute("add", "");
+		assertFails("Incorrect arguments: add email");
 	}
 
-	private Output execute(String... command)
+	private void execute(String... command)
 	{
-		return new UserManagement().execute(command);
+		output = new UserManagement().execute(command);
 	}
 
-	private void assertFails(Output output, String expectedMessage)
+	private void assertFails(String expectedMessage)
 	{
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
