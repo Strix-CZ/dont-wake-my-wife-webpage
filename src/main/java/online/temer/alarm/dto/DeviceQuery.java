@@ -1,5 +1,6 @@
 package online.temer.alarm.dto;
 
+import online.temer.alarm.db.ListResultSetHandler;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -8,6 +9,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.TimeZone;
 
 public class DeviceQuery
@@ -28,10 +30,10 @@ public class DeviceQuery
 		try
 		{
 			return new QueryRunner().query(connection,
-					"INSERT INTO Device(timeCreated, timeZone, secretKey) "
-							+ "VALUES (?, ?, ?) RETURNING id",
+					"INSERT INTO Device(timeCreated, timeZone, secretKey, kOwner) "
+							+ "VALUES (?, ?, ?, ?) RETURNING id",
 					new ScalarHandler<>(),
-					device.timeCreated, device.timeZone.toZoneId().getId(), device.secretKey);
+					device.timeCreated, device.timeZone.toZoneId().getId(), device.secretKey, device.owner);
 		}
 		catch (SQLException e)
 		{
@@ -45,10 +47,25 @@ public class DeviceQuery
 		{
 			return new QueryRunner().query(
 					connection,
-					"SELECT id, timeCreated, timeZone, secretKey "
-							+ "FROM Device WHERE id = ?",
+					"SELECT * FROM Device WHERE id = ?",
 					new Handler(),
 					id);
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	public List<DeviceDto> getByOwner(Connection connection, long owner)
+	{
+		try
+		{
+			return new QueryRunner().query(
+					connection,
+					"SELECT * FROM Device WHERE kOwner = ?",
+					new ListResultSetHandler<>(new Handler()),
+					owner);
 		}
 		catch (SQLException e)
 		{
@@ -62,7 +79,7 @@ public class DeviceQuery
 		{
 			return new QueryRunner().query(
 					connection,
-					"SELECT id, timeCreated, timeZone, secretKey FROM Device",
+					"SELECT * FROM Device",
 					new Handler());
 		}
 		catch (SQLException e)
@@ -85,8 +102,8 @@ public class DeviceQuery
 					rs.getLong("id"),
 					rs.getTimestamp("timeCreated").toLocalDateTime(),
 					TimeZone.getTimeZone(ZoneId.of(rs.getString("timeZone"))),
-					rs.getString("secretKey")
-			);
+					rs.getString("secretKey"),
+					rs.getLong("kOwner"));
 		}
 	}
 }

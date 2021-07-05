@@ -20,6 +20,7 @@ CREATE OR REPLACE TABLE Device
 	timeCreated DATETIME    NOT NULL,
 	timeZone    VARCHAR(30) NOT NULL,
 	secretKey   VARCHAR(50) NOT NULL,
+	kOwner      BIGINT,
 
 	PRIMARY KEY (id)
 );

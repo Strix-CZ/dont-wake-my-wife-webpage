@@ -2,7 +2,7 @@ package online.temer.alarm.dto;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,25 +10,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.TimeZone;
 
 @ExtendWith(DbTestExtension.class)
 class DeviceDtoTest
 {
-	private DeviceQuery query;
+	private DeviceQuery deviceQuery;
+	private UserQuery userQuery;
 	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		query = new DeviceQuery();
+		deviceQuery = new DeviceQuery();
+		userQuery = new UserQuery();
 	}
 
 	@Test
 	public void getNonExistentDevice_returnsNull()
 	{
-		Assertions.assertNull(query.get(connection, -1000));
+		Assertions.assertThat(deviceQuery.get(connection, -1000))
+				.isNull();
 	}
 
 	@Test
@@ -36,22 +40,50 @@ class DeviceDtoTest
 	{
 		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("America/New_York"));
 		LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
-		long id = query.insertDevice(connection, new DeviceDto(timeCreated, timeZone, "secretKey"));
-		DeviceDto device = query.get(connection, id);
+		long id = deviceQuery.insertDevice(connection, new DeviceDto(timeCreated, timeZone, "secretKey", null));
+		DeviceDto device = deviceQuery.get(connection, id);
 
-		Assertions.assertNotNull(device, "loadedDevice should not be null");
-		Assertions.assertTrue(device.id > 0, "id was less or equal to zero");
-		Assertions.assertEquals(timeCreated, device.timeCreated, "timeCreated");
-		Assertions.assertEquals(timeZone, device.timeZone, "timeZone");
-		Assertions.assertEquals("secretKey", device.secretKey, "secretKey");
+		Assertions.assertThat(device)
+				.as("loadedDevice should not be null")
+				.isNotNull();
+
+		Assertions.assertThat(device.id)
+				.as("id")
+				.isGreaterThan(0);
+
+		Assertions.assertThat(device.timeCreated)
+				.as("timeCreated")
+				.isEqualTo(timeCreated);
+
+		Assertions.assertThat(device.timeZone)
+				.as("timeZone")
+				.isEqualTo(timeZone);
+
+		Assertions.assertThat(device.secretKey)
+				.as("secretKey")
+				.isEqualTo("secretKey");
 	}
 
 	@Test
 	void whenThereAreMultipleDevices_getWithoutIdReturnsAnyOfThem()
 	{
-		query.generateSaveAndLoadDevice(connection);
-		query.generateSaveAndLoadDevice(connection);
+		deviceQuery.generateSaveAndLoadDevice(connection);
+		deviceQuery.generateSaveAndLoadDevice(connection);
 
-		Assertions.assertNotNull(query.get(connection));
+		Assertions.assertThat(deviceQuery.get(connection))
+				.isNotNull();
+	}
+
+	@Test
+	void testGettingDeviceByOwner()
+	{
+		var user = userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
+		long device1 = deviceQuery.insertDevice(connection, new DeviceDto(LocalDateTime.now(), TimeZone.getDefault(), "secretKey", user.id));
+		long device2 = deviceQuery.insertDevice(connection, new DeviceDto(LocalDateTime.now(), TimeZone.getDefault(), "secretKey", user.id));
+
+		List<DeviceDto> devices = deviceQuery.getByOwner(connection, user.id);
+		Assertions.assertThat(devices)
+				.extracting(device -> device.id)
+				.containsExactlyInAnyOrder(device1, device2);
 	}
 }

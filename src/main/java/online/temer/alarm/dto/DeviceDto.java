@@ -12,18 +12,20 @@ public class DeviceDto
 	public final LocalDateTime timeCreated;
 	public final TimeZone timeZone;
 	public final String secretKey;
+	public final Long owner;
 
-	public DeviceDto(LocalDateTime timeCreated, TimeZone timeZone, String secretKey)
+	public DeviceDto(LocalDateTime timeCreated, TimeZone timeZone, String secretKey, Long owner)
 	{
-		this(null, timeCreated, timeZone, secretKey);
+		this(null, timeCreated, timeZone, secretKey, owner);
 	}
 
-	public DeviceDto(Long id, LocalDateTime timeCreated, TimeZone timeZone, String secretKey)
+	public DeviceDto(Long id, LocalDateTime timeCreated, TimeZone timeZone, String secretKey, Long owner)
 	{
 		this.id = id;
 		this.timeCreated = timeCreated;
 		this.timeZone = timeZone;
 		this.secretKey = secretKey;
+		this.owner = owner;
 	}
 
 	@Override
@@ -34,13 +36,13 @@ public class DeviceDto
 		if (o == null || getClass() != o.getClass())
 			return false;
 		DeviceDto deviceDto = (DeviceDto) o;
-		return Objects.equals(id, deviceDto.id) && Objects.equals(timeCreated, deviceDto.timeCreated) && Objects.equals(timeZone, deviceDto.timeZone) && Objects.equals(secretKey, deviceDto.secretKey);
+		return Objects.equals(id, deviceDto.id) && timeCreated.equals(deviceDto.timeCreated) && timeZone.equals(deviceDto.timeZone) && secretKey.equals(deviceDto.secretKey) && Objects.equals(owner, deviceDto.owner);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(id, timeCreated, timeZone, secretKey);
+		return Objects.hash(id, timeCreated, timeZone, secretKey, owner);
 	}
 
 	public static DeviceDto generateDevice()
@@ -60,7 +62,7 @@ public class DeviceDto
 		return new DeviceDto(
 				LocalDateTime.now(),
 				timeZone,
-				secretKey
-		);
+				secretKey,
+				null);
 	}
 }
