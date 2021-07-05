@@ -35,35 +35,35 @@ public class UserManagementTest
 	void unknownString_invalidCommand()
 	{
 		execute("invalid");
-		assertFails("Invalid command");
+		assertFailed("Invalid command");
 	}
 
 	@Test
 	void noArguments_invalidCommand()
 	{
 		execute();
-		assertFails("Invalid command");
+		assertFailed("Invalid command");
 	}
 
 	@Test
 	void addingUserWithoutEmail_incorrectArguments()
 	{
 		execute("addUser");
-		assertFails("Incorrect arguments: addUser john@example.com");
+		assertIncorrectArguments();
 	}
 
 	@Test
 	void addingUserWithExtraArguments_incorrectArguments()
 	{
 		execute("addUser", "bla", "ble");
-		assertFails("Incorrect arguments: addUser john@example.com");
+		assertIncorrectArguments();
 	}
 
 	@Test
 	void addingUserWithEmptyEmail_incorrectArguments()
 	{
 		execute("addUser", "");
-		assertFails("Incorrect arguments: addUser john@example.com");
+		assertIncorrectArguments();
 	}
 
 	@Test
@@ -127,7 +127,12 @@ public class UserManagementTest
 		output = management.execute(command);
 	}
 
-	private void assertFails(String expectedMessage)
+	private void assertIncorrectArguments()
+	{
+		assertFailed("Incorrect arguments: addUser john@example.com");
+	}
+
+	private void assertFailed(String expectedMessage)
 	{
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
