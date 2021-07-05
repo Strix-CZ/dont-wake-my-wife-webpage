@@ -24,7 +24,7 @@ public class DatabaseUserList implements UserList
 			return Optional.empty();
 		}
 
-		String hash = UserQuery.getHash(credentials.password, user.salt);
+		String hash = userQuery.getHash(credentials.password, user.salt);
 		if (user.hash.equals(hash))
 		{
 			return Optional.of(user);

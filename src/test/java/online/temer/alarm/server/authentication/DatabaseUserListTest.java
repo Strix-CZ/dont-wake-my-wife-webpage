@@ -37,8 +37,7 @@ class DatabaseUserListTest
 	@Test
 	void incorrectEmail_loginFails()
 	{
-		var user = UserQuery.createUser("john@example.com", "bar");
-		userQuery.insert(connection, user);
+		userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
 
 		Assertions.assertThat(authenticate("wrong@example.com", "bar"))
 				.isEmpty();
@@ -47,8 +46,7 @@ class DatabaseUserListTest
 	@Test
 	void incorrectPassword_loginFails()
 	{
-		var user = UserQuery.createUser("john@example.com", "bar");
-		userQuery.insert(connection, user);
+		userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
 
 		Assertions.assertThat(authenticate("john@example.com", "wrong"))
 				.isEmpty();
@@ -57,14 +55,12 @@ class DatabaseUserListTest
 	@Test
 	void correctCredentials_loginSucceeds()
 	{
-		var user = UserQuery.createUser("john@example.com", "bar");
-		long id = userQuery.insert(connection, user);
+		var user = userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
 
 		Assertions.assertThat(authenticate("john@example.com", "bar"))
 				.isPresent()
 				.get()
-				.extracting(userDto -> userDto.id)
-				.isEqualTo(id);
+				.isEqualTo(user);
 	}
 
 	private Optional<UserDto> authenticate(String email, String password)

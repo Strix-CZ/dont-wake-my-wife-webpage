@@ -57,7 +57,13 @@ public class UserQuery
 		}
 	}
 
-	public static UserDto createUser(String email, String password)
+	public UserDto createInsertAndLoadUser(Connection connection, String email, String password)
+	{
+		insert(connection, createUser(email, password));
+		return get(connection, email);
+	}
+
+	public UserDto createUser(String email, String password)
 	{
 		String salt = generateSalt();
 		String hash = getHash(password, salt);
@@ -65,14 +71,14 @@ public class UserQuery
 		return new UserDto(email, hash, salt);
 	}
 
-	public static String generateSalt()
+	public String generateSalt()
 	{
 		byte[] salt = new byte[64];
 		new SecureRandom().nextBytes(salt);
 		return Base64.getEncoder().encodeToString(salt);
 	}
 
-	public static String getHash(String password, String salt)
+	public String getHash(String password, String salt)
 	{
 		try
 		{

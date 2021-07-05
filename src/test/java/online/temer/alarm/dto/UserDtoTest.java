@@ -74,7 +74,7 @@ public class UserDtoTest
 	@Test
 	void salt_is64BytesLong()
 	{
-		String salt = UserQuery.generateSalt();
+		String salt = userQuery.generateSalt();
 		int saltLength = Base64.getDecoder().decode(salt).length;
 
 		Assertions.assertThat(saltLength)
@@ -89,7 +89,7 @@ public class UserDtoTest
 		Set<String> salts = new HashSet<>(attempts);
 		for (int i = 0; i < attempts; i++)
 		{
-			salts.add(UserQuery.generateSalt());
+			salts.add(userQuery.generateSalt());
 		}
 
 		Assertions.assertThat(salts.size())
@@ -99,7 +99,7 @@ public class UserDtoTest
 	@Test
 	void testHash()
 	{
-		String hash = UserQuery.getHash("password", "salt");
+		String hash = userQuery.getHash("password", "salt");
 
 		Assertions.assertThat(hash)
 				.isEqualTo("JZrW7V2byWXXSW+It3cpIeFoILSEhopgjy9kiIe9mU1CU1Wx2MSEDo7DcHuN+dBdAL1bNKKNDtSe74Nj0cZyFA==");
