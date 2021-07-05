@@ -19,7 +19,6 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- Way how to execute the server (main method)
 - UI
 - Connection pool  
 - Method to estimate battery percentage from check-ins

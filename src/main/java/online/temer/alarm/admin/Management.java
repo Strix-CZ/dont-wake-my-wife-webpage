@@ -4,6 +4,7 @@ import online.temer.alarm.dto.DeviceDto;
 import online.temer.alarm.dto.DeviceQuery;
 import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.dto.UserQuery;
+import online.temer.alarm.server.Server;
 
 import java.security.SecureRandom;
 import java.sql.Connection;
@@ -14,12 +15,14 @@ public class Management
 	private final Connection connection;
 	private final UserQuery userQuery;
 	private final DeviceQuery deviceQuery;
+	private final Server server;
 
-	public Management(Connection connection, UserQuery userQuery, DeviceQuery deviceQuery)
+	public Management(Connection connection, UserQuery userQuery, DeviceQuery deviceQuery, Server server)
 	{
 		this.connection = connection;
 		this.userQuery = userQuery;
 		this.deviceQuery = deviceQuery;
+		this.server = server;
 	}
 
 	public Output execute(String... command)
@@ -29,17 +32,42 @@ public class Management
 			return invalidCommand();
 		}
 
-		if (command[0].equals("addUser"))
+		switch (command[0])
 		{
-			return addUser(command);
+			case "addUser":
+				return addUser(command);
+			case "addDevice":
+				return addDevice(command);
+			case "server":
+				return startServer(command);
+			default:
+				return invalidCommand();
 		}
-		else if (command[0].equals("addDevice"))
+	}
+
+	private Output startServer(String[] command)
+	{
+		if (command.length != 3)
 		{
-			return addDevice(command);
+			return new Output(1, "Incorrect arguments: server host port");
 		}
-		else
+
+		server.start(Integer.parseInt(command[2]), command[1]);
+
+		try
 		{
-			return invalidCommand();
+			while (true)
+			{
+				Thread.sleep(1000);
+			}
+		}
+		catch (InterruptedException e)
+		{
+			return new Output(0, "Server interrupted");
+		}
+		finally
+		{
+			server.stop();
 		}
 	}
 

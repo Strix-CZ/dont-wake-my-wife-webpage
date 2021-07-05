@@ -11,22 +11,14 @@ public class Server
 	private final GetAlarmHandler getAlarmHandler;
 	private final SetAlarmHandler setAlarmHandler;
 
-	public Server(int port, String host, CheckInHandler checkInHandler, GetAlarmHandler getAlarmHandler, SetAlarmHandler setAlarmHandler)
+	public Server(CheckInHandler checkInHandler, GetAlarmHandler getAlarmHandler, SetAlarmHandler setAlarmHandler)
 	{
 		this.checkInHandler = checkInHandler;
 		this.getAlarmHandler = getAlarmHandler;
 		this.setAlarmHandler = setAlarmHandler;
-
-		createServer(port, host);
 	}
 
-	public void stop()
-	{
-		Spark.stop();
-		Spark.awaitStop();
-	}
-
-	private void createServer(int port, String host)
+	public void start(int port, String host)
 	{
 		Spark.ipAddress(host);
 		Spark.port(port);
@@ -36,5 +28,11 @@ public class Server
 		Spark.post("/alarm", setAlarmHandler);
 
 		Spark.awaitInitialization();
+	}
+
+	public void stop()
+	{
+		Spark.stop();
+		Spark.awaitStop();
 	}
 }

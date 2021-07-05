@@ -28,7 +28,7 @@ public class DeviceManagementTest
 		connection = new TestConnectionProvider().get();
 		userQuery = new UserQuery();
 		deviceQuery = new DeviceQuery();
-		management = new Management(connection, userQuery, deviceQuery);
+		management = new Management(connection, userQuery, deviceQuery, null);
 	}
 
 	@Test

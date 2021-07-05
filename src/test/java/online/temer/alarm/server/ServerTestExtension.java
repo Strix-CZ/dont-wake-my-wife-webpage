@@ -30,11 +30,11 @@ public class ServerTestExtension extends DbTestExtension
 		ExceptionLogger exceptionLogger = new TestExceptionLogger();
 
 		server = new Server(
-				8765,
-				"localhost",
 				new CheckInHandler(deviceAuthentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
 				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery),
 				new SetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery));
+
+		server.start(8765, "localhost");
 	}
 
 	@Override

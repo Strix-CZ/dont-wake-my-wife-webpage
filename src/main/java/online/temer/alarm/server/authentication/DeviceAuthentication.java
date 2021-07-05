@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-class DeviceAuthentication implements Authentication<DeviceDto>
+public class DeviceAuthentication implements Authentication<DeviceDto>
 {
 	private final DeviceQuery deviceQuery;
 

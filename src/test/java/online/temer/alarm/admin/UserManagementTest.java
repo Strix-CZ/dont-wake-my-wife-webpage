@@ -28,7 +28,7 @@ public class UserManagementTest
 	{
 		userQuery = new UserQuery();
 		connection = new TestConnectionProvider().get();
-		management = new Management(connection, userQuery, new DeviceQuery());
+		management = new Management(connection, userQuery, new DeviceQuery(), null);
 		userList = new DatabaseUserList(userQuery);
 	}
 
