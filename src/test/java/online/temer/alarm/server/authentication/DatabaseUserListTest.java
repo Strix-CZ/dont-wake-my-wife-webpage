@@ -3,6 +3,8 @@ package online.temer.alarm.server.authentication;
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.UserQuery;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,17 +20,25 @@ import java.util.Set;
 class DatabaseUserListTest
 {
 	private DatabaseUserList databaseUserList;
+	private UserQuery userQuery;
+	private Connection connection;
+	private DeviceDto device;
 
 	@BeforeEach
 	void setUp()
 	{
-		databaseUserList = new DatabaseUserList();
+		connection = new TestConnectionProvider().get();
+		userQuery = new UserQuery();
+		DeviceQuery deviceQuery = new DeviceQuery();
+		databaseUserList = new DatabaseUserList(userQuery, deviceQuery);
+
+		device = deviceQuery.generateSaveAndLoadDevice(connection);
 	}
 
 	@Test
 	void nonExistentUser_authenticationFailure()
 	{
-		Assertions.assertThat(authenticate())
+		Assertions.assertThat(authenticate("john@example.com", "bar"))
 				.isEmpty();
 	}
 
@@ -66,11 +76,42 @@ class DatabaseUserListTest
 				.isEqualTo("JZrW7V2byWXXSW+It3cpIeFoILSEhopgjy9kiIe9mU1CU1Wx2MSEDo7DcHuN+dBdAL1bNKKNDtSe74Nj0cZyFA==");
 	}
 
-	private Optional<DeviceDto> authenticate()
+	@Test
+	void incorrectEmail_loginFails()
 	{
-		UserList.Credentials credentials = new UserList.Credentials("john@example.com", "bar");
-		Connection connection = new TestConnectionProvider().get();
+		var user = databaseUserList.createUser("john@example.com", "bar");
+		userQuery.insert(connection, user);
 
+		Assertions.assertThat(authenticate("wrong@example.com", "bar"))
+				.isEmpty();
+	}
+
+	@Test
+	void incorrectPassword_loginFails()
+	{
+		var user = databaseUserList.createUser("john@example.com", "bar");
+		userQuery.insert(connection, user);
+
+		Assertions.assertThat(authenticate("john@example.com", "wrong"))
+				.isEmpty();
+	}
+
+	@Test
+	void correctCredentials_loginSucceeds()
+	{
+		var user = databaseUserList.createUser("john@example.com", "bar");
+		userQuery.insert(connection, user);
+
+		Assertions.assertThat(authenticate("john@example.com", "bar"))
+				.isPresent()
+				.get()
+				.extracting(device -> device.id)
+				.isEqualTo(device.id);
+	}
+
+	private Optional<DeviceDto> authenticate(String email, String password)
+	{
+		UserList.Credentials credentials = new UserList.Credentials(email, password);
 		return databaseUserList.authenticate(credentials, connection);
 	}
 }

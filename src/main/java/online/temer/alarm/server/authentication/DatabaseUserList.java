@@ -1,6 +1,9 @@
 package online.temer.alarm.server.authentication;
 
 import online.temer.alarm.dto.DeviceDto;
+import online.temer.alarm.dto.DeviceQuery;
+import online.temer.alarm.dto.UserDto;
+import online.temer.alarm.dto.UserQuery;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -15,11 +18,41 @@ import java.util.Optional;
 
 public class DatabaseUserList implements UserList
 {
+	private final UserQuery userQuery;
+	private final DeviceQuery deviceQuery;
+
+	public DatabaseUserList(UserQuery userQuery, DeviceQuery deviceQuery)
+	{
+		this.userQuery = userQuery;
+		this.deviceQuery = deviceQuery;
+	}
 
 	@Override
 	public Optional<DeviceDto> authenticate(Credentials credentials, Connection connection)
 	{
-		return Optional.empty();
+		UserDto user = userQuery.get(connection, credentials.username);
+		if (user == null)
+		{
+			return Optional.empty();
+		}
+
+		String hash = getHash(credentials.password, user.salt);
+		if (user.hash.equals(hash))
+		{
+			return Optional.ofNullable(deviceQuery.get(connection));
+		}
+		else
+		{
+			return Optional.empty();
+		}
+	}
+
+	public UserDto createUser(String email, String password)
+	{
+		String salt = generateSalt();
+		String hash = getHash(password, salt);
+
+		return new UserDto(email, hash, salt);
 	}
 
 	String generateSalt()
