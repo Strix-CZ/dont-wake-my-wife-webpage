@@ -1,10 +1,24 @@
 package online.temer.alarm.admin;
 
+import online.temer.alarm.dto.UserDto;
+import online.temer.alarm.dto.UserQuery;
+import online.temer.alarm.server.authentication.DatabaseUserList;
+import online.temer.alarm.server.authentication.UserList;
+
 import java.security.SecureRandom;
-import java.util.Base64;
+import java.sql.Connection;
 
 public class UserManagement
 {
+	private final Connection connection;
+	private final UserQuery userQuery;
+
+	public UserManagement(Connection connection, UserQuery userQuery)
+	{
+		this.connection = connection;
+		this.userQuery = userQuery;
+	}
+
 	public Output execute(String... command)
 	{
 		if (command.length == 0 || !command[0].equals("add"))
@@ -17,7 +31,10 @@ public class UserManagement
 			return new Output(1, "Incorrect arguments: add email");
 		}
 
-		return new Output(0, "password: " + generatePassword());
+		String password = generatePassword();
+		userQuery.createInsertAndLoadUser(connection, command[1], password);
+
+		return new Output(0, "password: " + password);
 	}
 
 	public String generatePassword()

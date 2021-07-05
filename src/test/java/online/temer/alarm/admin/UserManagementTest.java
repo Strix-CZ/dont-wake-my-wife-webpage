@@ -1,22 +1,30 @@
 package online.temer.alarm.admin;
 
+import online.temer.alarm.db.DbTestExtension;
+import online.temer.alarm.db.TestConnectionProvider;
+import online.temer.alarm.dto.UserQuery;
 import online.temer.alarm.test.util.TestUniqueness;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.Connection;
 
+@ExtendWith(DbTestExtension.class)
 public class UserManagementTest
 {
 	private Output output;
 	private UserManagement userManagement;
+	private UserQuery userQuery;
+	private Connection connection;
 
 	@BeforeEach
 	void setUp()
 	{
-		userManagement = new UserManagement();
+		userQuery = new UserQuery();
+		connection = new TestConnectionProvider().get();
+		userManagement = new UserManagement(connection, userQuery);
 	}
 
 	@Test
@@ -54,7 +62,6 @@ public class UserManagementTest
 		assertFails("Incorrect arguments: add email");
 	}
 
-
 	@Test
 	void addingUser_success()
 	{
@@ -72,6 +79,21 @@ public class UserManagementTest
 	}
 
 	@Test
+	void user_isSavedInDb()
+	{
+		execute("add", "john@example.com");
+		var user = userQuery.get(connection, "john@example.com");
+
+		Assertions.assertThat(user)
+				.as("saved user in DB")
+				.isNotNull();
+
+		Assertions.assertThat(user.email)
+				.as("email")
+				.isEqualTo("john@example.com");
+	}
+
+	@Test
 	void generatingPassword_is10charactersLong()
 	{
 		Assertions.assertThat(userManagement.generatePassword().length())
@@ -86,7 +108,7 @@ public class UserManagementTest
 
 	private void execute(String... command)
 	{
-		output = new UserManagement().execute(command);
+		output = userManagement.execute(command);
 	}
 
 	private void assertFails(String expectedMessage)
