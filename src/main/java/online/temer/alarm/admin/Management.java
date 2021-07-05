@@ -1,5 +1,6 @@
 package online.temer.alarm.admin;
 
+import online.temer.alarm.dto.UserDto;
 import online.temer.alarm.dto.UserQuery;
 
 import java.security.SecureRandom;
@@ -55,6 +56,12 @@ public class Management
 		if (command.length != 2)
 		{
 			return new Output(1, "Incorrect arguments: addDevice owner@example.com");
+		}
+
+		UserDto owner = userQuery.get(connection, command[1]);
+		if (owner == null)
+		{
+			return new Output(1, "Unknown owner");
 		}
 
 		return new Output(0,

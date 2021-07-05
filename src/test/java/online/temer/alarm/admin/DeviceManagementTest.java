@@ -16,12 +16,14 @@ public class DeviceManagementTest
 	private Output output;
 	private Management management;
 	private Connection connection;
+	private UserQuery userQuery;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		management = new Management(connection, new UserQuery());
+		userQuery = new UserQuery();
+		management = new Management(connection, userQuery);
 	}
 
 	@Test
@@ -50,8 +52,23 @@ public class DeviceManagementTest
 	}
 
 	@Test
+	void addingDeviceWithUnknownOwner_fails()
+	{
+		execute("addDevice", "unknown@example.com");
+
+		Assertions.assertThat(output.exitCode)
+				.as("exit code")
+				.isEqualTo(1);
+
+		Assertions.assertThat(output.lines)
+				.as("output")
+				.containsExactly("Unknown owner");
+	}
+
+	@Test
 	void addingDevice_success()
 	{
+		userQuery.createInsertAndLoadUser(connection, "john@example.com", "bar");
 		execute("addDevice", "john@example.com");
 
 		Assertions.assertThat(output.exitCode)
