@@ -51,6 +51,12 @@ public class UserManagementTest
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
 				.isEqualTo(0);
+
+		Assertions.assertThat(output.lines)
+				.as("output")
+				.first()
+				.as("password")
+				.matches(s -> s.matches("password: [a-z]+"));
 	}
 
 	private void execute(String... command)
