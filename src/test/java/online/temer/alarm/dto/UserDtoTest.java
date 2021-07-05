@@ -2,6 +2,7 @@ package online.temer.alarm.dto;
 
 import online.temer.alarm.db.DbTestExtension;
 import online.temer.alarm.db.TestConnectionProvider;
+import online.temer.alarm.test.util.TestUniqueness;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,16 +85,7 @@ public class UserDtoTest
 	@Test
 	void salt_isAlwaysDifferent()
 	{
-		int attempts = 1000;
-
-		Set<String> salts = new HashSet<>(attempts);
-		for (int i = 0; i < attempts; i++)
-		{
-			salts.add(userQuery.generateSalt());
-		}
-
-		Assertions.assertThat(salts.size())
-				.isEqualTo(attempts);
+		TestUniqueness.assertUniqueness(1000, () -> userQuery.generateSalt());
 	}
 
 	@Test
