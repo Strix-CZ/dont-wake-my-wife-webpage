@@ -41,10 +41,24 @@ public class Management
 		String vowels = "aeiou";
 
 		String password = "";
-		for (int i = 0; i < 6; ++i)
+		int category = random.nextInt(2);
+		int categorySequenceLengh = 0;
+		for (int i = 0; i < 12; ++i)
 		{
-			password += "" + consonants.charAt(random.nextInt(consonants.length()))
-					+ vowels.charAt(random.nextInt(vowels.length()));
+			if (category == 0)
+				password += "" + consonants.charAt(random.nextInt(consonants.length()));
+			else
+				password += "" + vowels.charAt(random.nextInt(vowels.length()));
+
+			if (categorySequenceLengh == 1 || random.nextInt(2) == 0)
+			{
+				category = (category + 1) % 2;
+				categorySequenceLengh = 0;
+			}
+			else
+			{
+				categorySequenceLengh++;
+			}
 		}
 
 		return password;
