@@ -57,7 +57,9 @@ public class Management
 			return new Output(1, "There are no arguments for addDevice");
 		}
 
-		return new Output(0);
+		return new Output(0,
+				"id: 0",
+				"secret: x");
 	}
 
 	public String generatePassword()

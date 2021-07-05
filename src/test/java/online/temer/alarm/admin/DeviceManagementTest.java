@@ -46,6 +46,16 @@ public class DeviceManagementTest
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
 				.isEqualTo(0);
+
+		Assertions.assertThat(output.lines)
+				.as("output")
+				.first()
+				.as("first line")
+				.matches(line -> line.matches("id: [0-9]+"));
+
+		Assertions.assertThat(output.lines.get(1))
+				.as("second line")
+				.matches(line -> line.matches("secret: [^ ]+"));
 	}
 
 	private void execute(String... command)
