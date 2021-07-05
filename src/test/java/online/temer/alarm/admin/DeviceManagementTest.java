@@ -28,22 +28,28 @@ public class DeviceManagementTest
 	void addingDeviceWithExtraArguments_incorrectArguments()
 	{
 		execute("addDevice", "bla");
-		assertFails("There are no arguments for addDevice");
-	}
 
-	private void execute(String... command)
-	{
-		output = management.execute(command);
-	}
-
-	private void assertFails(String expectedMessage)
-	{
 		Assertions.assertThat(output.exitCode)
 				.as("exit code")
 				.isEqualTo(1);
 
 		Assertions.assertThat(output.lines)
 				.as("output")
-				.containsExactly(expectedMessage);
+				.containsExactly("There are no arguments for addDevice");
+	}
+
+	@Test
+	void addingDevice_success()
+	{
+		execute("addDevice");
+
+		Assertions.assertThat(output.exitCode)
+				.as("exit code")
+				.isEqualTo(0);
+	}
+
+	private void execute(String... command)
+	{
+		output = management.execute(command);
 	}
 }

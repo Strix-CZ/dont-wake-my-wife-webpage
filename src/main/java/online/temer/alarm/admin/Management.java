@@ -52,7 +52,12 @@ public class Management
 
 	private Output addDevice(String[] command)
 	{
-		return new Output(1, "There are no arguments for addDevice");
+		if (command.length != 1)
+		{
+			return new Output(1, "There are no arguments for addDevice");
+		}
+
+		return new Output(0);
 	}
 
 	public String generatePassword()
