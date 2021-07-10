@@ -4,6 +4,8 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Http
+import Base64
 
 
 
@@ -11,23 +13,35 @@ import Html.Events exposing (onInput)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.element
+    { init = init
+    , update = update
+    , subscriptions = subscriptions
+    , view = view
+    }
 
 
 
 -- MODEL
 
+type Model
+  = Failure Http.Error
+  | Loading
+  | Success String
 
-type alias Model =
-  { name : String
-  , password : String
-  , passwordAgain : String
-  }
-
-
-init : Model
-init =
-  Model "" "" ""
+init : () -> (Model, Cmd Msg)
+init _ =
+  ( Loading
+  , Http.request
+        { method = "GET"
+        , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
+        , url = "http://localhost:8080/alarm"
+        , body = Http.emptyBody
+        , expect = Http.expectString GotAlarm
+        , timeout = Nothing
+        , tracker = Nothing
+        }  
+  )
 
 
 
@@ -35,46 +49,91 @@ init =
 
 
 type Msg
-  = Name String
-  | Password String
-  | PasswordAgain String
+  = GotAlarm (Result Http.Error String)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Name name ->
-      { model | name = name }
+    GotAlarm result ->
+      case result of
+        Ok fullText ->
+          (Success fullText, Cmd.none)
 
-    Password password ->
-      { model | password = password }
+        Err error ->
+          (Failure error, Cmd.none)
 
-    PasswordAgain password ->
-      { model | passwordAgain = password }
 
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 -- VIEW
 
-
 view : Model -> Html Msg
 view model =
-  div []
-    [ viewInput "text" "Name" model.name Name
-    , viewInput "password" "Password" model.password Password
-    , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
-    , viewValidation model
-    ]
+  case model of
+    Failure error ->
+      text ("I was unable to load alarms. " ++ (explainHttpError error))
+
+    Loading ->
+      text "Loading..."
+
+    Success fullText ->
+      pre [] [ text fullText ]
+
+explainHttpError: Http.Error -> String
+explainHttpError error =
+  case error of
+    Http.BadUrl url ->
+      "URL " ++ url ++ " is invalid."
+
+    Http.Timeout ->
+      "The server did not respond. Are you online?"
+
+    Http.NetworkError ->
+      "There was a network error. Are you online?"
+
+    Http.BadStatus status ->
+      "The server replied " ++ (String.fromInt status) ++ "."
+
+    Http.BadBody _ ->
+      "The server responded in an unexpected way."
 
 
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-  input [ type_ t, placeholder p, value v, onInput toMsg ] []
+--view : Model -> Html Msg
+--view model =
+--    div [ style "margin" "50px" ]
+--        [ viewInput "text" "Name" model.name Name
+--        , viewInput "password" "Password" model.password Password
+--        , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
+--        , viewValidation model
+--        ]
 
 
-viewValidation : Model -> Html msg
-viewValidation model =
-  if model.password == model.passwordAgain then
-    div [ style "color" "green" ] [ text "OK" ]
-  else
-    div [ style "color" "red" ] [ text "Passwords do not match!" ]
+--viewInput : String -> String -> String -> (String -> msg) -> Html msg
+--viewInput t p v toMsg =
+--    div [ style "padding" "10px" ]
+--        [ input [ type_ t, placeholder p, value v, onInput toMsg ] []
+--        ]
+
+
+--viewValidation : Model -> Html msg
+--viewValidation model =
+--    if model.password == model.passwordAgain then
+--        div [ style "color" "green" ] [ text "OK" ]
+--    else
+--        div [ style "color" "red" ] [ text "Passwords do not match!" ]
+
+
+buildAuthorizationHeader : String -> String -> Http.Header
+buildAuthorizationHeader username password =
+    Http.header "Authorization" ("Basic " ++ (buildAuthorizationToken username password))
+
+buildAuthorizationToken : String -> String -> String
+buildAuthorizationToken username password =
+  Base64.encode (username ++ ":" ++ password)
+  
