@@ -72,6 +72,7 @@ alarmSetDecoder =
 
 type Msg
   = ReceivedAlarm (Result Http.Error Alarm)
+  | TimeUpdated String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -84,6 +85,9 @@ update msg model =
 
         Err error ->
           (Failure error, Cmd.none)
+
+    TimeUpdated time ->
+      (model, Cmd.none)
 
 
 -- SUBSCRIPTIONS
@@ -105,9 +109,22 @@ view model =
       text "Loading..."
 
     GotAlarm alarm ->
-      case alarm of
-        UnsetAlarm -> text "No alarm is set."
-        SetAlarm time -> text (String.fromInt time.hour ++ ":" ++ (String.fromInt time.minute))
+      viewInput "time" "time" (alarmToTime alarm) TimeUpdated
+
+alarmToTime : Alarm -> String
+alarmToTime alarm =
+  case alarm of
+    UnsetAlarm -> ""
+    SetAlarm time -> timeToString time
+
+timeToString : Time -> String
+timeToString time =
+  String.fromInt time.hour ++ ":" ++ (String.fromInt time.minute)
+
+
+viewInput : String -> String -> String -> (String -> msg) -> Html msg
+viewInput t p v toMsg =
+  input [ type_ t, placeholder p, value v, onInput toMsg ] []
 
 explainHttpError: Http.Error -> String
 explainHttpError error =
