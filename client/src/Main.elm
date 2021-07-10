@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Http
 import Base64
+import Json.Decode exposing (Decoder, field, int, map2, oneOf)
 
 
 
@@ -24,10 +25,16 @@ main =
 
 -- MODEL
 
+type alias Time = { hour : Int, minute : Int }
+
+type Alarm
+  = UnsetAlarm
+  | SetAlarm Time
+
 type Model
   = Failure Http.Error
   | Loading
-  | Success String
+  | GotAlarm Alarm
 
 init : () -> (Model, Cmd Msg)
 init _ =
@@ -37,11 +44,26 @@ init _ =
         , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
         , url = "http://localhost:8080/alarm"
         , body = Http.emptyBody
-        , expect = Http.expectString GotAlarm
+        , expect = Http.expectJson ReceivedAlarm alarmDecoder
         , timeout = Nothing
         , tracker = Nothing
         }  
   )
+
+alarmDecoder : Decoder Alarm
+alarmDecoder =
+  oneOf
+    [ alarmSetDecoder
+    , Json.Decode.succeed UnsetAlarm
+    ]
+
+alarmSetDecoder : Decoder Alarm
+alarmSetDecoder = 
+  Json.Decode.map SetAlarm (
+    Json.Decode.map2 Time
+      (field "hour" int)
+      (field "minute" int)
+    )
 
 
 
@@ -49,16 +71,16 @@ init _ =
 
 
 type Msg
-  = GotAlarm (Result Http.Error String)
+  = ReceivedAlarm (Result Http.Error Alarm)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GotAlarm result ->
+    ReceivedAlarm result ->
       case result of
-        Ok fullText ->
-          (Success fullText, Cmd.none)
+        Ok alarm ->
+          (GotAlarm alarm, Cmd.none)
 
         Err error ->
           (Failure error, Cmd.none)
@@ -82,8 +104,10 @@ view model =
     Loading ->
       text "Loading..."
 
-    Success fullText ->
-      pre [] [ text fullText ]
+    GotAlarm alarm ->
+      case alarm of
+        UnsetAlarm -> text "No alarm is set."
+        SetAlarm time -> text (String.fromInt time.hour ++ ":" ++ (String.fromInt time.minute))
 
 explainHttpError: Http.Error -> String
 explainHttpError error =
