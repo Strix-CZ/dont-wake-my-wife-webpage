@@ -29,6 +29,8 @@ public abstract class Handler<E> implements Route
 	{
 		try
 		{
+			response.header("Access-Control-Allow-Origin", "*");
+
 			var parameterReader = new QueryParameterReader(request);
 			var connection = connectionProvider.get();
 			final Handler.Response handlerResponse;
