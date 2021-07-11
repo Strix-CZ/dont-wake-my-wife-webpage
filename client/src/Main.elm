@@ -12,7 +12,6 @@ import Json.Decode exposing (Decoder, field, int, map2, oneOf)
 
 -- MAIN
 
-
 main =
   Browser.element
     { init = init
@@ -50,25 +49,9 @@ init _ =
         }  
   )
 
-alarmDecoder : Decoder Alarm
-alarmDecoder =
-  oneOf
-    [ alarmSetDecoder
-    , Json.Decode.succeed UnsetAlarm
-    ]
-
-alarmSetDecoder : Decoder Alarm
-alarmSetDecoder = 
-  Json.Decode.map SetAlarm (
-    Json.Decode.map2 Time
-      (field "hour" int)
-      (field "minute" int)
-    )
-
 
 
 -- UPDATE
-
 
 type Msg
   = ReceivedAlarm (Result Http.Error Alarm)
@@ -90,11 +73,13 @@ update msg model =
       (model, Cmd.none)
 
 
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
+
 
 
 -- VIEW
@@ -145,30 +130,27 @@ explainHttpError error =
       "The server responded in an unexpected way. " ++ message
 
 
---view : Model -> Html Msg
---view model =
---    div [ style "margin" "50px" ]
---        [ viewInput "text" "Name" model.name Name
---        , viewInput "password" "Password" model.password Password
---        , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
---        , viewValidation model
---        ]
+
+-- JSON
+
+alarmDecoder : Decoder Alarm
+alarmDecoder =
+  oneOf
+    [ alarmSetDecoder
+    , Json.Decode.succeed UnsetAlarm
+    ]
+
+alarmSetDecoder : Decoder Alarm
+alarmSetDecoder = 
+  Json.Decode.map SetAlarm (
+    Json.Decode.map2 Time
+      (field "hour" int)
+      (field "minute" int)
+    )
 
 
---viewInput : String -> String -> String -> (String -> msg) -> Html msg
---viewInput t p v toMsg =
---    div [ style "padding" "10px" ]
---        [ input [ type_ t, placeholder p, value v, onInput toMsg ] []
---        ]
 
-
---viewValidation : Model -> Html msg
---viewValidation model =
---    if model.password == model.passwordAgain then
---        div [ style "color" "green" ] [ text "OK" ]
---    else
---        div [ style "color" "red" ] [ text "Passwords do not match!" ]
-
+-- HELPERS
 
 buildAuthorizationHeader : String -> String -> Http.Header
 buildAuthorizationHeader username password =
