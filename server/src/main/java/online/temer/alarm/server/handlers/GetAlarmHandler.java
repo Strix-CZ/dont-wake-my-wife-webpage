@@ -44,8 +44,8 @@ public class GetAlarmHandler extends Handler<UserDto>
 		else
 		{
 			return new Response(200,
-					"{hour:" + alarm.time.getHour() + ","
-							+ "minute:" + alarm.time.getMinute() + "}");
+					"{\"hour\":" + alarm.time.getHour() + ","
+							+ "\"minute\":" + alarm.time.getMinute() + "}");
 		}
 	}
 }
