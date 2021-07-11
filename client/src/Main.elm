@@ -141,8 +141,8 @@ explainHttpError error =
     Http.BadStatus status ->
       "The server replied " ++ (String.fromInt status) ++ "."
 
-    Http.BadBody _ ->
-      "The server responded in an unexpected way."
+    Http.BadBody e ->
+      "The server responded in an unexpected way. " ++ e
 
 
 --view : Model -> Html Msg
