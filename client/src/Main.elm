@@ -119,7 +119,7 @@ alarmToTime alarm =
 
 timeToString : Time -> String
 timeToString time =
-  String.fromInt time.hour ++ ":" ++ (String.fromInt time.minute)
+  String.fromInt time.hour ++ ":" ++ String.padLeft 2 '0' (String.fromInt time.minute)
 
 
 viewInput : String -> String -> String -> (String -> msg) -> Html msg
