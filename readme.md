@@ -19,7 +19,9 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- UI
+- Client checkbox to activate and inactivate
+- Server way to unset the alarm
+- Client a bit of styling
 - ProductionConnectionProvider - are connections getting closed?  
 - Connection pool
 - Method to estimate battery percentage from check-ins
