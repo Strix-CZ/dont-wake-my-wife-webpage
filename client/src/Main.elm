@@ -7,6 +7,9 @@ import Html.Events exposing (onInput)
 import Http
 import Base64
 import Json.Decode exposing (Decoder, field, int, map2, oneOf)
+import Json.Encode
+import ParseInt
+import Array
 
 
 
@@ -29,6 +32,7 @@ type alias Time = { hour : Int, minute : Int }
 type Alarm
   = UnsetAlarm
   | SetAlarm Time
+  | SetAlarmWithInvalidTime
 
 type Model
   = Failure Http.Error
@@ -38,16 +42,31 @@ type Model
 init : () -> (Model, Cmd Msg)
 init _ =
   ( Loading
-  , Http.request
-        { method = "GET"
-        , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
-        , url = "http://localhost:8080/alarm"
-        , body = Http.emptyBody
-        , expect = Http.expectJson ReceivedAlarm alarmDecoder
-        , timeout = Nothing
-        , tracker = Nothing
-        }  
+  , getAlarm
   )
+
+getAlarm =
+  Http.request
+    { method = "GET"
+    , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
+    , url = "http://localhost:8080/alarm"
+    , body = Http.emptyBody
+    , expect = Http.expectJson ReceivedAlarm alarmDecoder
+    , timeout = Nothing
+    , tracker = Nothing
+    }  
+
+postAlarm : Alarm -> Cmd Msg
+postAlarm alarm =
+  Http.request
+    { method = "POST"
+    , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
+    , url = "http://localhost:8080/alarm"
+    , body = Http.jsonBody (encodeAlarm alarm)
+    , expect = Http.expectWhatever AlarmUploaded
+    , timeout = Nothing
+    , tracker = Nothing
+    }  
 
 
 
@@ -56,6 +75,7 @@ init _ =
 type Msg
   = ReceivedAlarm (Result Http.Error Alarm)
   | TimeUpdated String
+  | AlarmUploaded (Result Http.Error ())
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -69,9 +89,21 @@ update msg model =
         Err error ->
           (Failure error, Cmd.none)
 
-    TimeUpdated time ->
-      (model, Cmd.none)
+    TimeUpdated timeString ->
+      case (stringToTime timeString) of
+        Ok time ->
+          (GotAlarm (SetAlarm time), postAlarm (SetAlarm time))
 
+        Err _ ->
+          (GotAlarm SetAlarmWithInvalidTime, Cmd.none)
+
+    AlarmUploaded result ->
+      case result of
+        Ok _ ->
+          (model, Cmd.none)
+
+        Err error ->
+          (Failure error, Cmd.none)
 
 
 -- SUBSCRIPTIONS
@@ -88,24 +120,37 @@ view : Model -> Html Msg
 view model =
   case model of
     Failure error ->
-      text ("I was unable to load alarms. " ++ (explainHttpError error))
+      text ("I was unable communicate with the server. " ++ (explainHttpError error))
 
     Loading ->
       text "Loading..."
 
     GotAlarm alarm ->
-      viewInput "time" "time" (alarmToTime alarm) TimeUpdated
+      viewInput "time" "time" (alarmToString alarm) TimeUpdated 
 
-alarmToTime : Alarm -> String
-alarmToTime alarm =
+alarmToString : Alarm -> String
+alarmToString alarm =
   case alarm of
     UnsetAlarm -> ""
     SetAlarm time -> timeToString time
+    SetAlarmWithInvalidTime -> ""
 
 timeToString : Time -> String
 timeToString time =
-  String.fromInt time.hour ++ ":" ++ String.padLeft 2 '0' (String.fromInt time.minute)
+  (String.padLeft 2 '0' (String.fromInt time.hour))
+    ++ ":"
+    ++ (String.padLeft 2 '0' (String.fromInt time.minute))
 
+stringToTime : String -> Result ParseInt.Error Time
+stringToTime timeSring = 
+  let
+    components = String.split ":" timeSring |> Array.fromList
+    hourString = Array.get 0 components |> Maybe.withDefault ""
+    minuteString = Array.get 1 components |> Maybe.withDefault ""
+    hour = ParseInt.parseInt hourString
+    minute = ParseInt.parseInt minuteString
+  in
+    Result.map2 Time hour minute
 
 viewInput : String -> String -> String -> (String -> msg) -> Html msg
 viewInput t p v toMsg =
@@ -148,6 +193,20 @@ alarmSetDecoder =
       (field "minute" int)
     )
 
+encodeAlarm : Alarm -> Json.Encode.Value
+encodeAlarm alarm =
+  case alarm of
+    UnsetAlarm ->
+      Json.Encode.null
+
+    SetAlarmWithInvalidTime ->
+      Json.Encode.null
+
+    SetAlarm time ->
+      Json.Encode.object
+        [ ( "hour", Json.Encode.int time.hour )
+        , ( "minute", Json.Encode.int time.minute)
+        ]
 
 
 -- HELPERS
