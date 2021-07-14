@@ -42,7 +42,7 @@ class AlarmDtoTest
 	@Test
 	void savingAndLoading_returnsSameAlarm()
 	{
-		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
 		AlarmDto alarmDto = query.get(connection, device.id);
 
 		Assertions.assertEquals(device.id, alarmDto.device, "device");
@@ -52,8 +52,8 @@ class AlarmDtoTest
 	@Test
 	void updatingAlarm_overridesExistingAlarm()
 	{
-		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
-		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(5, 30)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(5, 30)));
 
 		AlarmDto alarmDto = query.get(connection, device.id);
 		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Alarm was not updated");
@@ -68,7 +68,7 @@ class AlarmDtoTest
 	@Test
 	void deleteAlarm_deletes()
 	{
-		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
 		query.delete(connection, device.id);
 
 		Assertions.assertNull(query.get(connection, device.id));
@@ -78,9 +78,9 @@ class AlarmDtoTest
 	void deleteAlarm_doesNotDeleteAlarmOfOtherDevice()
 	{
 		var otherDevice = deviceQuery.generateSaveAndLoadDevice(connection);
-		query.insertOrUpdateAlarm(connection, new AlarmDto(otherDevice.id, LocalTime.of(20, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(otherDevice.id, LocalTime.of(20, 0)));
 
-		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(10, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(10, 0)));
 		query.delete(connection, device.id);
 
 		AlarmDto alarmDto = query.get(connection, otherDevice.id);

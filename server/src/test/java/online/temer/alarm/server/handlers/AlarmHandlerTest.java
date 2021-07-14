@@ -118,7 +118,7 @@ class AlarmHandlerTest
 	private void setAlarmInDatabase(DeviceDto device, int hour, int minute)
 	{
 		var alarm = new AlarmDto(device.id, LocalTime.of(hour, minute));
-		new AlarmQuery().insertOrUpdateAlarm(connection, alarm);
+		new AlarmQuery().insertOrUpdate(connection, alarm);
 	}
 
 	private HttpResponse<String> getAlarmInGetRequest()

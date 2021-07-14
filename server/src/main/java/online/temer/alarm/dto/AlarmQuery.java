@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 public class AlarmQuery
 {
-	public void insertOrUpdateAlarm(Connection connection, AlarmDto alarm)
+	public void insertOrUpdate(Connection connection, AlarmDto alarm)
 	{
 		try
 		{

@@ -51,7 +51,7 @@ public class SetAlarmHandler extends Handler<UserDto>
 				var time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
 				var alarmDto = new AlarmDto(device.id, time);
 
-				alarmQuery.insertOrUpdateAlarm(connection, alarmDto);
+				alarmQuery.insertOrUpdate(connection, alarmDto);
 			}
 
 			return new Response(200);
