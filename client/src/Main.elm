@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onCheck)
 import Http
 import Base64
 import Json.Decode exposing (Decoder, field, int, map2, oneOf)
@@ -76,6 +76,7 @@ type Msg
   = ReceivedAlarm (Result Http.Error Alarm)
   | TimeUpdated String
   | AlarmUploaded (Result Http.Error ())
+  | ActiveUpdated Bool
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -105,6 +106,14 @@ update msg model =
         Err error ->
           (Failure error, Cmd.none)
 
+    ActiveUpdated active ->
+      case active of
+        True ->
+          (GotAlarm SetAlarmWithInvalidTime, Cmd.none)
+
+        False -> 
+          (GotAlarm UnsetAlarm, postAlarm (UnsetAlarm))
+
 
 -- SUBSCRIPTIONS
 
@@ -126,7 +135,10 @@ view model =
       text "Loading..."
 
     GotAlarm alarm ->
-      viewInput "time" "time" (alarmToString alarm) TimeUpdated 
+      div []
+        [ input [ type_ "checkbox", checked (isAlarmActive alarm), onCheck ActiveUpdated ] []
+        , input [ type_ "time", value (alarmToString alarm), onInput TimeUpdated ] []
+        ]
 
 alarmToString : Alarm -> String
 alarmToString alarm =
@@ -134,6 +146,13 @@ alarmToString alarm =
     UnsetAlarm -> ""
     SetAlarm time -> timeToString time
     SetAlarmWithInvalidTime -> ""
+
+isAlarmActive : Alarm -> Bool
+isAlarmActive alarm =
+  case alarm of
+    UnsetAlarm -> False
+    SetAlarm _ -> True
+    SetAlarmWithInvalidTime -> True
 
 timeToString : Time -> String
 timeToString time =
@@ -151,10 +170,6 @@ stringToTime timeSring =
     minute = ParseInt.parseInt minuteString
   in
     Result.map2 Time hour minute
-
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-  input [ type_ t, placeholder p, value v, onInput toMsg ] []
 
 explainHttpError: Http.Error -> String
 explainHttpError error =
