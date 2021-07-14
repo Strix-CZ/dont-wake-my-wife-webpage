@@ -104,6 +104,17 @@ class AlarmHandlerTest
 		assertTimeOfAlarm(getAlarmInGetRequest(), 20, 10);
 	}
 
+	@Test
+	void sendingNull_removesAlarm() throws URISyntaxException
+	{
+		setAlarmInDatabase(device, 20, 0);
+		HttpUtil.makePostResquest(new URI("http://localhost:8765/alarm"), "null");
+
+		Assertions.assertThat(getAlarmInGetRequest().body())
+				.as("response body")
+				.isEqualTo("{}");
+	}
+
 	private void setAlarmInDatabase(DeviceDto device, int hour, int minute)
 	{
 		var alarm = new AlarmDto(device.id, LocalTime.of(hour, minute));

@@ -16,12 +16,14 @@ class AlarmDtoTest
 	private AlarmQuery query;
 	private DeviceDto device;
 	private Connection connection;
+	private DeviceQuery deviceQuery;
 
 	@BeforeEach
 	void setUp()
 	{
 		connection = new TestConnectionProvider().get();
-		device = new DeviceQuery().generateSaveAndLoadDevice(connection);
+		deviceQuery = new DeviceQuery();
+		device = deviceQuery.generateSaveAndLoadDevice(connection);
 		query = new AlarmQuery();
 	}
 
@@ -55,5 +57,33 @@ class AlarmDtoTest
 
 		AlarmDto alarmDto = query.get(connection, device.id);
 		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Alarm was not updated");
+	}
+
+	@Test
+	void noAlarm_deleteDoesNothing()
+	{
+		query.delete(connection, device.id);
+	}
+
+	@Test
+	void deleteAlarm_deletes()
+	{
+		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
+		query.delete(connection, device.id);
+
+		Assertions.assertNull(query.get(connection, device.id));
+	}
+
+	@Test
+	void deleteAlarm_doesNotDeleteAlarmOfOtherDevice()
+	{
+		var otherDevice = deviceQuery.generateSaveAndLoadDevice(connection);
+		query.insertOrUpdateAlarm(connection, new AlarmDto(otherDevice.id, LocalTime.of(20, 0)));
+
+		query.insertOrUpdateAlarm(connection, new AlarmDto(device.id, LocalTime.of(10, 0)));
+		query.delete(connection, device.id);
+
+		AlarmDto alarmDto = query.get(connection, otherDevice.id);
+		Assertions.assertNotNull(alarmDto, "The alarm was deleted");
 	}
 }

@@ -43,6 +43,20 @@ public class AlarmQuery
 		}
 	}
 
+	public void delete(Connection connection, long device)
+	{
+		try
+		{
+			new QueryRunner().update(connection,
+					"DELETE FROM Alarm WHERE kDevice = ? ",
+					device);
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static class Handler implements ResultSetHandler<AlarmDto>
 	{
 		@Override
