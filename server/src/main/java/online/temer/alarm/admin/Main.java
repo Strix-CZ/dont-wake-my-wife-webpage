@@ -1,6 +1,5 @@
 package online.temer.alarm.admin;
 
-import online.temer.alarm.db.ConnectionProvider;
 import online.temer.alarm.db.ProductionConnectionProvider;
 import online.temer.alarm.dto.AlarmQuery;
 import online.temer.alarm.dto.DeviceCheckInQuery;
@@ -16,6 +15,7 @@ import online.temer.alarm.server.handlers.CheckInHandler;
 import online.temer.alarm.server.handlers.GetAlarmHandler;
 import online.temer.alarm.server.handlers.SetAlarmHandler;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -23,10 +23,13 @@ public class Main
 {
 	public static void main(String[] args)
 	{
+		var configurationReader = new ConfigurationReader(new File("db-config"));
 
-		try (Connection connection = new ProductionConnectionProvider().get())
+		ProductionConnectionProvider connectionProvider = new ProductionConnectionProvider(configurationReader.readPassword());
+
+		try (Connection connection = connectionProvider.get())
 		{
-			var management = new Management(connection, new UserQuery(), new DeviceQuery(), createServer());
+			var management = new Management(connection, new UserQuery(), new DeviceQuery(), createServer(connectionProvider));
 
 			Output output = management.execute(args);
 
@@ -39,9 +42,8 @@ public class Main
 		}
 	}
 
-	private static Server createServer()
+	private static Server createServer(ProductionConnectionProvider connectionProvider)
 	{
-		ConnectionProvider connectionProvider = new ProductionConnectionProvider();
 		DeviceQuery deviceQuery = new DeviceQuery();
 		DeviceAuthentication deviceAuthentication = new DeviceAuthentication(deviceQuery);
 		UserQuery userQuery = new UserQuery();

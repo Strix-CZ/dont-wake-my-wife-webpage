@@ -87,6 +87,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>server-dont-wake-my-wife</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

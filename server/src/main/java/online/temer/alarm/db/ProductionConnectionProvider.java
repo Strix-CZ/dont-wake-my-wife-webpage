@@ -8,14 +8,20 @@ public class ProductionConnectionProvider implements ConnectionProvider
 {
 	private static final String URL = "jdbc:mariadb://localhost/alarm_clock";
 	private static final String USER = "app";
-	private static final String PASS = "RI05jHfMiPl0Kfxeuskno5cKlf";
+
+	private final String password; // "";
+
+	public ProductionConnectionProvider(String password)
+	{
+		this.password = password;
+	}
 
 	@Override
 	public synchronized Connection get()
 	{
 		try
 		{
-			Connection connection = DriverManager.getConnection(URL, USER, PASS);
+			Connection connection = DriverManager.getConnection(URL, USER, password);
 			connection.setAutoCommit(true);
 			return connection;
 		}
