@@ -34,14 +34,18 @@ type Alarm
   | SetAlarm Time
   | SetAlarmWithInvalidTime
 
-type Model
+type State
   = Failure Http.Error
   | Loading
   | GotAlarm Alarm
 
+type alias Model =
+  { state : State }
+  
+
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Loading
+  ( { state = Loading }
   , getAlarm
   )
 
@@ -85,34 +89,48 @@ update msg model =
     ReceivedAlarm result ->
       case result of
         Ok alarm ->
-          (GotAlarm alarm, Cmd.none)
+          ( { model | state = GotAlarm alarm }
+          , Cmd.none
+          )
 
         Err error ->
-          (Failure error, Cmd.none)
+          ( { model | state = Failure error }
+          , Cmd.none
+          )
 
     TimeUpdated timeString ->
       case (stringToTime timeString) of
         Ok time ->
-          (GotAlarm (SetAlarm time), postAlarm (SetAlarm time))
+          ( { model | state = GotAlarm (SetAlarm time) }
+          , postAlarm (SetAlarm time)
+          )
 
         Err _ ->
-          (GotAlarm SetAlarmWithInvalidTime, Cmd.none)
+          ( { model | state = GotAlarm SetAlarmWithInvalidTime }
+          , Cmd.none
+          )
 
     AlarmUploaded result ->
       case result of
         Ok _ ->
-          (model, Cmd.none)
+          ( model , Cmd.none )
 
         Err error ->
-          (Failure error, Cmd.none)
+          ( { model | state = Failure error }
+          , Cmd.none
+          )
 
     ActiveUpdated active ->
       case active of
         True ->
-          (GotAlarm SetAlarmWithInvalidTime, Cmd.none)
+          ( { model | state = GotAlarm SetAlarmWithInvalidTime }
+          , Cmd.none
+          )
 
         False -> 
-          (GotAlarm UnsetAlarm, postAlarm (UnsetAlarm))
+          ( { model | state = GotAlarm UnsetAlarm }
+          , postAlarm (UnsetAlarm)
+          )
 
 
 -- SUBSCRIPTIONS
@@ -137,7 +155,7 @@ view model =
     ( viewBody model )
 
 viewBody model =
-  case model of
+  case model.state of
     Failure error ->
       [ text "I was unable communicate with the server. "
       , br [] []
