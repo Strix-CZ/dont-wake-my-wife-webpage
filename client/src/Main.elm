@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onCheck)
+import Html.Events exposing (onInput, onCheck, onSubmit)
 import Http
 import Base64
 import Json.Decode exposing (Decoder, field, int, map2, oneOf)
@@ -40,19 +40,23 @@ type State
   | GotAlarm Alarm
 
 type alias Model =
-  { state : State }
+  { state : State
+  , username : String
+  , password : String
+  }
   
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( { state = Loading }
-  , getAlarm
+  ( { state = Loading, username = "", password = "" }
+  , (getAlarm "" "")
   )
 
-getAlarm =
+getAlarm : String -> String -> Cmd Msg
+getAlarm username password =
   Http.request
     { method = "GET"
-    , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
+    , headers = [(buildAuthorizationHeader username password)]
     , url = "http://localhost:8080/alarm"
     , body = Http.emptyBody
     , expect = Http.expectJson ReceivedAlarm alarmDecoder
@@ -60,11 +64,13 @@ getAlarm =
     , tracker = Nothing
     }  
 
-postAlarm : Alarm -> Cmd Msg
-postAlarm alarm =
+
+-- tavaaziomsaq
+postAlarm : Alarm -> String -> String -> Cmd Msg
+postAlarm alarm username password =
   Http.request
     { method = "POST"
-    , headers = [(buildAuthorizationHeader "jan.simonek@gmail.com" "tavaaziomsaq")]
+    , headers = [(buildAuthorizationHeader username password)]
     , url = "http://localhost:8080/alarm"
     , body = Http.jsonBody (encodeAlarm alarm)
     , expect = Http.expectWhatever AlarmUploaded
@@ -78,9 +84,12 @@ postAlarm alarm =
 
 type Msg
   = ReceivedAlarm (Result Http.Error Alarm)
-  | TimeUpdated String
   | AlarmUploaded (Result Http.Error ())
+  | TimeUpdated String
   | ActiveUpdated Bool
+  | UsernameUpdated String
+  | PasswordUpdated String
+  | LogIn
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -102,7 +111,7 @@ update msg model =
       case (stringToTime timeString) of
         Ok time ->
           ( { model | state = GotAlarm (SetAlarm time) }
-          , postAlarm (SetAlarm time)
+          , postAlarm (SetAlarm time) model.username model.password
           )
 
         Err _ ->
@@ -129,8 +138,17 @@ update msg model =
 
         False -> 
           ( { model | state = GotAlarm UnsetAlarm }
-          , postAlarm (UnsetAlarm)
+          , (postAlarm (UnsetAlarm) model.username model.password )
           )
+
+    UsernameUpdated username ->
+      ( { model | username = username}, Cmd.none )
+
+    PasswordUpdated password ->
+      ( { model | password = password}, Cmd.none )      
+
+    LogIn ->
+      ( model, (getAlarm model.username model.password ) )
 
 
 -- SUBSCRIPTIONS
@@ -156,8 +174,14 @@ view model =
 
 viewBody model =
   case model.state of
+    Failure (Http.BadStatus 401) ->
+      viewLoginScreen False
+
+    Failure (Http.BadStatus 403) ->
+      viewLoginScreen True
+
     Failure error ->
-      [ text "I was unable communicate with the server. "
+      [ text "I was unable to communicate with the server. "
       , br [] []
       , text ( explainHttpError error )
       ]
@@ -171,6 +195,27 @@ viewBody model =
         , br [] []
         , makeTimeInput alarm
         ]
+
+viewLoginScreen : Bool -> List (Html Msg)
+viewLoginScreen previousFailed =
+  [
+    Html.form [ onSubmit LogIn ]
+    (
+      List.append
+      [ input [ type_ "text", placeholder "E-mail", onInput UsernameUpdated ] []
+      , br [] []
+      , input [ type_ "password", onInput PasswordUpdated ] []
+      , br [] []
+      , input [ type_ "submit", value "Log-in" ] [ ]
+      ]
+      (
+        case previousFailed of
+          False -> []
+          True -> [ br [] [], text "Incorrect e-mail or password." ]
+      )
+    )
+  ]
+
 
 makeActiveCheckbox alarm =
   input
@@ -283,7 +328,12 @@ encodeAlarm alarm =
 
 buildAuthorizationHeader : String -> String -> Http.Header
 buildAuthorizationHeader username password =
-    Http.header "Authorization" ("Basic " ++ (buildAuthorizationToken username password))
+  case (username, password) of
+    ("", "") ->
+      Http.header "From" "Anonymous"
+
+    _ ->
+      Http.header "Authorization" ("Basic " ++ (buildAuthorizationToken username password))
 
 buildAuthorizationToken : String -> String -> String
 buildAuthorizationToken username password =

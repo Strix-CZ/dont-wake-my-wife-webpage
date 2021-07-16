@@ -19,7 +19,6 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- Client - way hot to enter username and password
 - ProductionConnectionProvider - are connections getting closed?  
 - Connection pool
 - Method to estimate battery percentage from check-ins
