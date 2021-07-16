@@ -181,16 +181,18 @@ viewBody model =
       viewLoginScreen True
 
     Failure error ->
-      [ text "I was unable to communicate with the server. "
+      [ h1 [] [ text "Error" ]
+      , text "I was unable to communicate with the server. "
       , br [] []
       , text ( explainHttpError error )
       ]
 
     Loading ->
-      [ text "Loading..." ]
+      [ h1 [] [ text "Loading..." ] ]
 
     GotAlarm alarm ->
-        [ makeActiveCheckbox alarm
+        [ h1 [] [ text "Alarm" ]
+        , makeActiveCheckbox alarm
         , label [ for "isActive" ] [ text " Active " ]
         , br [] []
         , makeTimeInput alarm
@@ -198,8 +200,8 @@ viewBody model =
 
 viewLoginScreen : Bool -> List (Html Msg)
 viewLoginScreen previousFailed =
-  [
-    Html.form [ onSubmit LogIn ]
+  [ h1 [] [ text "Log-in" ]
+  , Html.form [ onSubmit LogIn ]
     (
       List.append
       [ input [ type_ "text", placeholder "E-mail", onInput UsernameUpdated ] []
