@@ -37,10 +37,6 @@ type alias Alarm =
   , time : Time
   }
 
-createDefaultAlarm : Alarm
-createDefaultAlarm =
-  Alarm False (Time 7 0)
-
 type State
   = Failure Http.Error
   | Loading
@@ -63,32 +59,6 @@ init _ =
     }
   , (getAlarm "" "")
   )
-
-getAlarm : String -> String -> Cmd Msg
-getAlarm username password =
-  Http.request
-    { method = "GET"
-    , headers = [(buildAuthorizationHeader username password)]
-    , url = "http://localhost:8080/alarm"
-    , body = Http.emptyBody
-    , expect = Http.expectJson ReceivedAlarm alarmDecoder
-    , timeout = Nothing
-    , tracker = Nothing
-    }  
-
-
--- tavaaziomsaq
-postAlarm : Alarm -> String -> String -> Cmd Msg
-postAlarm alarm username password =
-  Http.request
-    { method = "POST"
-    , headers = [(buildAuthorizationHeader username password)]
-    , url = "http://localhost:8080/alarm"
-    , body = Http.jsonBody (encodeAlarm alarm)
-    , expect = Http.expectWhatever AlarmUploaded
-    , timeout = Nothing
-    , tracker = Nothing
-    }  
 
 
 
@@ -136,16 +106,6 @@ update msg model =
           , Cmd.none
           )
 
-    AlarmUploaded result ->
-      case result of
-        Ok _ ->
-          ( model , Cmd.none )
-
-        Err error ->
-          ( { model | state = Failure error }
-          , Cmd.none
-          )
-
     ActiveUpdated active ->
       let
         alarm = model.alarm
@@ -164,6 +124,17 @@ update msg model =
 
     LogIn ->
       ( model, (getAlarm model.username model.password ) )
+
+    AlarmUploaded result ->
+      case result of
+        Ok _ ->
+          ( model , Cmd.none )
+
+        Err error ->
+          ( { model | state = Failure error }
+          , Cmd.none
+          )
+
 
 
 -- SUBSCRIPTIONS
@@ -257,24 +228,6 @@ makeTimeInput alarm =
     ]
     []
 
-
-timeToString : Time -> String
-timeToString time =
-  (String.padLeft 2 '0' (String.fromInt time.hour))
-    ++ ":"
-    ++ (String.padLeft 2 '0' (String.fromInt time.minute))
-
-stringToTime : String -> Result ParseInt.Error Time
-stringToTime timeSring = 
-  let
-    components = String.split ":" timeSring |> Array.fromList
-    hourString = Array.get 0 components |> Maybe.withDefault ""
-    minuteString = Array.get 1 components |> Maybe.withDefault ""
-    hour = ParseInt.parseInt hourString
-    minute = ParseInt.parseInt minuteString
-  in
-    Result.map2 Time hour minute
-
 explainHttpError: Http.Error -> String
 explainHttpError error =
   case error of
@@ -325,7 +278,55 @@ encodeAlarm alarm =
         ]
 
 
+
 -- HELPERS
+
+getAlarm : String -> String -> Cmd Msg
+getAlarm username password =
+  Http.request
+    { method = "GET"
+    , headers = [(buildAuthorizationHeader username password)]
+    , url = "http://localhost:8080/alarm"
+    , body = Http.emptyBody
+    , expect = Http.expectJson ReceivedAlarm alarmDecoder
+    , timeout = Nothing
+    , tracker = Nothing
+    }  
+
+
+-- tavaaziomsaq
+postAlarm : Alarm -> String -> String -> Cmd Msg
+postAlarm alarm username password =
+  Http.request
+    { method = "POST"
+    , headers = [(buildAuthorizationHeader username password)]
+    , url = "http://localhost:8080/alarm"
+    , body = Http.jsonBody (encodeAlarm alarm)
+    , expect = Http.expectWhatever AlarmUploaded
+    , timeout = Nothing
+    , tracker = Nothing
+    }  
+
+timeToString : Time -> String
+timeToString time =
+  (String.padLeft 2 '0' (String.fromInt time.hour))
+    ++ ":"
+    ++ (String.padLeft 2 '0' (String.fromInt time.minute))
+
+stringToTime : String -> Result ParseInt.Error Time
+stringToTime timeSring = 
+  let
+    components = String.split ":" timeSring |> Array.fromList
+    hourString = Array.get 0 components |> Maybe.withDefault ""
+    minuteString = Array.get 1 components |> Maybe.withDefault ""
+    hour = ParseInt.parseInt hourString
+    minute = ParseInt.parseInt minuteString
+  in
+    Result.map2 Time hour minute
+
+createDefaultAlarm : Alarm
+createDefaultAlarm =
+  Alarm False (Time 7 0)
 
 buildAuthorizationHeader : String -> String -> Http.Header
 buildAuthorizationHeader username password =
@@ -339,4 +340,3 @@ buildAuthorizationHeader username password =
 buildAuthorizationToken : String -> String -> String
 buildAuthorizationToken username password =
   Base64.encode (username ++ ":" ++ password)
-  
