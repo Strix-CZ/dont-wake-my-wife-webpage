@@ -14,11 +14,11 @@ public class AlarmQuery
 		try
 		{
 			new QueryRunner().update(connection,
-					"INSERT INTO Alarm(kDevice, time) "
-							+ "VALUES (?, ?) "
+					"INSERT INTO Alarm(kDevice, isActive, time) "
+							+ "VALUES (?, ?, ?) "
 							+ "ON DUPLICATE KEY UPDATE "
-							+ "time = ?",
-					alarm.device, alarm.time, alarm.time);
+							+ "isActive = ?, time = ?",
+					alarm.device, alarm.isActive, alarm.time, alarm.isActive, alarm.time);
 		}
 		catch (SQLException e)
 		{
@@ -32,8 +32,7 @@ public class AlarmQuery
 		{
 			return new QueryRunner().query(
 					connection,
-					"SELECT kDevice, time "
-							+ "FROM Alarm WHERE kDevice = ?",
+					"SELECT * FROM Alarm WHERE kDevice = ?",
 					new Handler(),
 					device);
 		}
@@ -69,8 +68,8 @@ public class AlarmQuery
 
 			return new AlarmDto(
 					rs.getLong("kDevice"),
-					rs.getTimestamp("time").toLocalDateTime().toLocalTime()
-			);
+					rs.getBoolean("isActive"),
+					rs.getTimestamp("time").toLocalDateTime().toLocalTime());
 		}
 	}
 }

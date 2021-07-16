@@ -42,21 +42,23 @@ class AlarmDtoTest
 	@Test
 	void savingAndLoading_returnsSameAlarm()
 	{
-		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 50, 10)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, true, LocalTime.of(23, 50, 10)));
 		AlarmDto alarmDto = query.get(connection, device.id);
 
 		Assertions.assertEquals(device.id, alarmDto.device, "device");
+		Assertions.assertTrue(alarmDto.isActive, "isActive");
 		Assertions.assertEquals(LocalTime.of(23, 50, 10), alarmDto.time, "time");
 	}
 
 	@Test
 	void updatingAlarm_overridesExistingAlarm()
 	{
-		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
-		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(5, 30)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, true, LocalTime.of(23, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, false, LocalTime.of(5, 30)));
 
 		AlarmDto alarmDto = query.get(connection, device.id);
-		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Alarm was not updated");
+		Assertions.assertEquals(LocalTime.of(5, 30), alarmDto.time, "Time of alarm was not updated");
+		Assertions.assertFalse(alarmDto.isActive, "Is active was not updated");
 	}
 
 	@Test
@@ -68,7 +70,7 @@ class AlarmDtoTest
 	@Test
 	void deleteAlarm_deletes()
 	{
-		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, true, LocalTime.of(23, 0)));
 		query.delete(connection, device.id);
 
 		Assertions.assertNull(query.get(connection, device.id));
@@ -78,9 +80,9 @@ class AlarmDtoTest
 	void deleteAlarm_doesNotDeleteAlarmOfOtherDevice()
 	{
 		var otherDevice = deviceQuery.generateSaveAndLoadDevice(connection);
-		query.insertOrUpdate(connection, new AlarmDto(otherDevice.id, LocalTime.of(20, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(otherDevice.id, true, LocalTime.of(20, 0)));
 
-		query.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(10, 0)));
+		query.insertOrUpdate(connection, new AlarmDto(device.id, false, LocalTime.of(10, 0)));
 		query.delete(connection, device.id);
 
 		AlarmDto alarmDto = query.get(connection, otherDevice.id);

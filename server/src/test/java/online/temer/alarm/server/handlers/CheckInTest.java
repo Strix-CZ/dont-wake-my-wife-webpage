@@ -82,7 +82,7 @@ public class CheckInTest
 	public void alarmSet_checkInSendsIt()
 	{
 		new AlarmQuery()
-				.insertOrUpdate(connection, new AlarmDto(device.id, LocalTime.of(23, 6, 0)));
+				.insertOrUpdate(connection, new AlarmDto(device.id, true, LocalTime.of(23, 6, 0)));
 		var response = makeGetRequest(100);
 
 		Assertions.assertEquals(200, response.statusCode(), "response code was not 200");

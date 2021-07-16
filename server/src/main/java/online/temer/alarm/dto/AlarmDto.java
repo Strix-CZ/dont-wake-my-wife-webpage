@@ -6,11 +6,13 @@ import java.util.Objects;
 public class AlarmDto
 {
 	public final Long device;
+	public final boolean isActive;
 	public final LocalTime time;
 
-	public AlarmDto(Long device, LocalTime time)
+	public AlarmDto(Long device, boolean isActive, LocalTime time)
 	{
 		this.device = device;
+		this.isActive = isActive;
 		this.time = time;
 	}
 
