@@ -56,16 +56,21 @@ class AlarmHandlerTest
 	@Test
 	void alarmIsSet_returnsIt()
 	{
-		setAlarmInDatabase(device, 22, 50);
-		assertTimeOfAlarm(getAlarmInGetRequest(), 22, 50);
+		setAlarmInDatabase(device, true, 22, 50);
+		assertAlarm(getAlarmInGetRequest(), true, 22, 50);
 	}
 
 	@Test
 	void noAlarmIsSet_postSetsIt()
 	{
-		setAlarmInPostRequest(4, 0);
+		setAlarmInPostRequest(false, 4, 0);
 
 		var alarm = new AlarmQuery().get(connection, device.id);
+
+		Assertions.assertThat(alarm.isActive)
+				.as("isActive")
+				.isEqualTo(false);
+
 		Assertions.assertThat(alarm.time)
 				.as("alarm time")
 				.isEqualTo(LocalTime.of(4, 0));
@@ -74,10 +79,14 @@ class AlarmHandlerTest
 	@Test
 	void alarmIsSet_postUpdatesIt()
 	{
-		setAlarmInDatabase(device, 20, 0);
-		setAlarmInPostRequest(0, 0);
+		setAlarmInDatabase(device, false, 20, 0);
+		setAlarmInPostRequest(true, 0, 0);
 
 		var alarm = new AlarmQuery().get(connection, device.id);
+
+		Assertions.assertThat(alarm.isActive)
+				.as("isActive")
+				.isEqualTo(true);
 
 		Assertions.assertThat(alarm.time)
 				.as("alarm time")
@@ -88,36 +97,36 @@ class AlarmHandlerTest
 	void multipleUsers_getsCorrectAlarm()
 	{
 		var otherDevice = deviceQuery.generateSaveAndLoadDevice(connection, 10);
-		setAlarmInDatabase(otherDevice, 8, 59);
-		setAlarmInDatabase(device, 20, 10);
+		setAlarmInDatabase(otherDevice, false, 8, 59);
+		setAlarmInDatabase(device, true, 20, 10);
 
-		assertTimeOfAlarm(getAlarmInGetRequest(), 20, 10);
+		assertAlarm(getAlarmInGetRequest(), true, 20, 10);
 	}
 
 	@Test
 	void multipleUsers_setsCorrectAlarm()
 	{
 		var otherDevice = deviceQuery.generateSaveAndLoadDevice(connection, 10);
-		setAlarmInDatabase(otherDevice, 8, 59);
-		setAlarmInPostRequest(20, 10);
+		setAlarmInDatabase(otherDevice, true, 8, 59);
+		setAlarmInPostRequest(false, 20, 10);
 
-		assertTimeOfAlarm(getAlarmInGetRequest(), 20, 10);
+		assertAlarm(getAlarmInGetRequest(), false, 20, 10);
 	}
 
 	@Test
-	void sendingNull_removesAlarm() throws URISyntaxException
+	void sendingNull_isInvalidRequest() throws URISyntaxException
 	{
-		setAlarmInDatabase(device, 20, 0);
-		HttpUtil.makePostResquest(new URI("http://localhost:8765/alarm"), "null");
+		setAlarmInDatabase(device, true, 20, 0);
+		var response = HttpUtil.makePostResquest(new URI("http://localhost:8765/alarm"), "null");
 
-		Assertions.assertThat(getAlarmInGetRequest().body())
-				.as("response body")
-				.isEqualTo("{}");
+		Assertions.assertThat(response.statusCode())
+				.as("response")
+				.isEqualTo(400);
 	}
 
-	private void setAlarmInDatabase(DeviceDto device, int hour, int minute)
+	private void setAlarmInDatabase(DeviceDto device, boolean isActive, int hour, int minute)
 	{
-		var alarm = new AlarmDto(device.id, true, LocalTime.of(hour, minute));
+		var alarm = new AlarmDto(device.id, isActive, LocalTime.of(hour, minute));
 		new AlarmQuery().insertOrUpdate(connection, alarm);
 	}
 
@@ -133,11 +142,12 @@ class AlarmHandlerTest
 		}
 	}
 
-	private HttpResponse<String> setAlarmInPostRequest(int hour, int minute)
+	private HttpResponse<String> setAlarmInPostRequest(boolean isActive, int hour, int minute)
 	{
 		try
 		{
 			var body = new JSONObject()
+					.put("isActive", isActive)
 					.put("hour", hour)
 					.put("minute", minute);
 
@@ -149,13 +159,17 @@ class AlarmHandlerTest
 		}
 	}
 
-	private void assertTimeOfAlarm(HttpResponse<String> response, int hour, int minute)
+	private void assertAlarm(HttpResponse<String> response, boolean isActive, int hour, int minute)
 	{
 		Assertions.assertThat(response.statusCode())
 				.as("HTTP status code")
 				.isEqualTo(200);
 
 		var responseJson = new JSONObject(response.body());
+
+		Assertions.assertThat(responseJson.get("isActive"))
+				.as("isActive")
+				.isEqualTo(isActive);
 
 		Assertions.assertThat(responseJson.get("hour"))
 				.as("hour")

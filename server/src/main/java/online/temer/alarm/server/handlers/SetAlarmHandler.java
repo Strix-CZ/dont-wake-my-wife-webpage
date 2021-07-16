@@ -41,18 +41,12 @@ public class SetAlarmHandler extends Handler<UserDto>
 
 		try
 		{
-			if ("null".equals(body))
-			{
-				alarmQuery.delete(connection, device.id);
-			}
-			else
-			{
-				var object = new JSONObject(body);
-				var time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
-				var alarmDto = new AlarmDto(device.id, true, time);
+			JSONObject object = new JSONObject(body);
+			boolean isActive = object.getBoolean("isActive");
+			LocalTime time = LocalTime.of(object.getInt("hour"), object.getInt("minute"));
+			AlarmDto alarmDto = new AlarmDto(device.id, isActive, time);
 
-				alarmQuery.insertOrUpdate(connection, alarmDto);
-			}
+			alarmQuery.insertOrUpdate(connection, alarmDto);
 
 			return new Response(200);
 		}
