@@ -127,18 +127,55 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
+  div
+    [ style "text-align" "center"
+    , style "margin" "100px 50px"
+    , style "font-family" "Helvetica, sans-serif"
+    , style "font-size" "large"
+    , style "line-height" "2em"
+    ]
+    ( viewBody model )
+
+viewBody model =
   case model of
     Failure error ->
-      text ("I was unable communicate with the server. " ++ (explainHttpError error))
+      [ text "I was unable communicate with the server. "
+      , br [] []
+      , text ( explainHttpError error )
+      ]
 
     Loading ->
-      text "Loading..."
+      [ text "Loading..." ]
 
     GotAlarm alarm ->
-      div []
-        [ input [ type_ "checkbox", checked (isAlarmActive alarm), onCheck ActiveUpdated ] []
-        , input [ type_ "time", value (alarmToString alarm), onInput TimeUpdated ] []
+        [ makeActiveCheckbox alarm
+        , label [ for "isActive" ] [ text " Active " ]
+        , br [] []
+        , makeTimeInput alarm
         ]
+
+makeActiveCheckbox alarm =
+  input
+    [ type_ "checkbox"
+    , id "isActive"
+    , checked (isAlarmActive alarm)
+    , onCheck ActiveUpdated
+    , style "width" "2em"
+    , style "height" "2em"
+    , style "vertical-align" "middle"
+    , style "position" "relative"
+    , style "bottom" ".08em"
+    ]
+    []
+
+makeTimeInput alarm =
+  input
+    [ type_ "time"
+    , value (alarmToString alarm)
+    , onInput TimeUpdated
+    , style "height" "2em"
+    ]
+    []
 
 alarmToString : Alarm -> String
 alarmToString alarm =
