@@ -37,10 +37,11 @@ type Alarm
 type State
   = Failure Http.Error
   | Loading
-  | GotAlarm Alarm
+  | GotAlarm
 
 type alias Model =
   { state : State
+  , alarm : Alarm
   , username : String
   , password : String
   }
@@ -48,7 +49,7 @@ type alias Model =
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( { state = Loading, username = "", password = "" }
+  ( { state = Loading, alarm = UnsetAlarm, username = "", password = "" }
   , (getAlarm "" "")
   )
 
@@ -98,7 +99,7 @@ update msg model =
     ReceivedAlarm result ->
       case result of
         Ok alarm ->
-          ( { model | state = GotAlarm alarm }
+          ( { model | alarm = alarm, state = GotAlarm }
           , Cmd.none
           )
 
@@ -110,12 +111,12 @@ update msg model =
     TimeUpdated timeString ->
       case (stringToTime timeString) of
         Ok time ->
-          ( { model | state = GotAlarm (SetAlarm time) }
+          ( { model | alarm = (SetAlarm time) }
           , postAlarm (SetAlarm time) model.username model.password
           )
 
         Err _ ->
-          ( { model | state = GotAlarm SetAlarmWithInvalidTime }
+          ( { model | alarm = SetAlarmWithInvalidTime }
           , Cmd.none
           )
 
@@ -132,12 +133,12 @@ update msg model =
     ActiveUpdated active ->
       case active of
         True ->
-          ( { model | state = GotAlarm SetAlarmWithInvalidTime }
+          ( { model | alarm = SetAlarmWithInvalidTime }
           , Cmd.none
           )
 
         False -> 
-          ( { model | state = GotAlarm UnsetAlarm }
+          ( { model | alarm = UnsetAlarm }
           , (postAlarm (UnsetAlarm) model.username model.password )
           )
 
@@ -190,12 +191,12 @@ viewBody model =
     Loading ->
       [ h1 [] [ text "Loading..." ] ]
 
-    GotAlarm alarm ->
+    GotAlarm ->
         [ h1 [] [ text "Alarm" ]
-        , makeActiveCheckbox alarm
+        , makeActiveCheckbox model.alarm
         , label [ for "isActive" ] [ text " Active " ]
         , br [] []
-        , makeTimeInput alarm
+        , makeTimeInput model.alarm
         ]
 
 viewLoginScreen : Bool -> List (Html Msg)
