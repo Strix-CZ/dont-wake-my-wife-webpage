@@ -27,12 +27,19 @@ main =
 
 -- MODEL
 
-type alias Time = { hour : Int, minute : Int }
+type alias Time =
+  { hour : Int
+  , minute : Int
+  }
 
-type Alarm
-  = UnsetAlarm
-  | SetAlarm Time
-  | SetAlarmWithInvalidTime
+type alias Alarm =
+  { isActive : Bool
+  , time : Time
+  }
+
+createDefaultAlarm : Alarm
+createDefaultAlarm =
+  Alarm False (Time 7 0)
 
 type State
   = Failure Http.Error
@@ -49,7 +56,11 @@ type alias Model =
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( { state = Loading, alarm = UnsetAlarm, username = "", password = "" }
+  ( { state = Loading
+    , alarm = createDefaultAlarm
+    , username = ""
+    , password = ""
+    }
   , (getAlarm "" "")
   )
 
@@ -111,12 +122,17 @@ update msg model =
     TimeUpdated timeString ->
       case (stringToTime timeString) of
         Ok time ->
-          ( { model | alarm = (SetAlarm time) }
-          , postAlarm (SetAlarm time) model.username model.password
-          )
+          let
+            alarm = model.alarm
+            newAlarm = { alarm | time = time }
+            newModel = { model | alarm = newAlarm }
+          in
+            ( newModel
+            , postAlarm newAlarm model.username model.password
+            )
 
         Err _ ->
-          ( { model | alarm = SetAlarmWithInvalidTime }
+          ( model
           , Cmd.none
           )
 
@@ -131,16 +147,14 @@ update msg model =
           )
 
     ActiveUpdated active ->
-      case active of
-        True ->
-          ( { model | alarm = SetAlarmWithInvalidTime }
-          , Cmd.none
-          )
-
-        False -> 
-          ( { model | alarm = UnsetAlarm }
-          , (postAlarm (UnsetAlarm) model.username model.password )
-          )
+      let
+        alarm = model.alarm
+        newAlarm = { alarm | isActive = active }
+        newModel = { model | alarm = newAlarm }
+      in
+        ( newModel
+        , postAlarm newAlarm model.username model.password
+        )
 
     UsernameUpdated username ->
       ( { model | username = username}, Cmd.none )
@@ -224,7 +238,7 @@ makeActiveCheckbox alarm =
   input
     [ type_ "checkbox"
     , id "isActive"
-    , checked (isAlarmActive alarm)
+    , checked alarm.isActive
     , onCheck ActiveUpdated
     , style "width" "2em"
     , style "height" "2em"
@@ -237,25 +251,12 @@ makeActiveCheckbox alarm =
 makeTimeInput alarm =
   input
     [ type_ "time"
-    , value (alarmToString alarm)
+    , value (timeToString alarm.time)
     , onInput TimeUpdated
     , style "height" "2em"
     ]
     []
 
-alarmToString : Alarm -> String
-alarmToString alarm =
-  case alarm of
-    UnsetAlarm -> ""
-    SetAlarm time -> timeToString time
-    SetAlarmWithInvalidTime -> ""
-
-isAlarmActive : Alarm -> Bool
-isAlarmActive alarm =
-  case alarm of
-    UnsetAlarm -> False
-    SetAlarm _ -> True
-    SetAlarmWithInvalidTime -> True
 
 timeToString : Time -> String
 timeToString time =
@@ -299,13 +300,13 @@ explainHttpError error =
 alarmDecoder : Decoder Alarm
 alarmDecoder =
   oneOf
-    [ alarmSetDecoder
-    , Json.Decode.succeed UnsetAlarm
+    [ activeAlarmDecoder
+    , Json.Decode.succeed createDefaultAlarm
     ]
 
-alarmSetDecoder : Decoder Alarm
-alarmSetDecoder = 
-  Json.Decode.map SetAlarm (
+activeAlarmDecoder : Decoder Alarm
+activeAlarmDecoder = 
+  Json.Decode.map (Alarm True) (
     Json.Decode.map2 Time
       (field "hour" int)
       (field "minute" int)
@@ -313,17 +314,14 @@ alarmSetDecoder =
 
 encodeAlarm : Alarm -> Json.Encode.Value
 encodeAlarm alarm =
-  case alarm of
-    UnsetAlarm ->
+  case alarm.isActive of
+    False ->
       Json.Encode.null
 
-    SetAlarmWithInvalidTime ->
-      Json.Encode.null
-
-    SetAlarm time ->
+    True ->
       Json.Encode.object
-        [ ( "hour", Json.Encode.int time.hour )
-        , ( "minute", Json.Encode.int time.minute)
+        [ ( "hour", Json.Encode.int alarm.time.hour )
+        , ( "minute", Json.Encode.int alarm.time.minute)
         ]
 
 

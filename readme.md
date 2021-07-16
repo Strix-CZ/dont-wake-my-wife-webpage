@@ -19,6 +19,8 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
+- Introduce the alarm.isActive to server to store it
+- Client - Load alarm.isActive from DB, don't create default alarm
 - ProductionConnectionProvider - are connections getting closed?  
 - Connection pool
 - Method to estimate battery percentage from check-ins
