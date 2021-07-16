@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onCheck, onSubmit)
 import Http
 import Base64
-import Json.Decode exposing (Decoder, field, int, map2, oneOf)
+import Json.Decode exposing (Decoder, field, int, map2, oneOf, bool)
 import Json.Encode
 import ParseInt
 import Array
@@ -250,30 +250,30 @@ explainHttpError error =
 
 -- JSON
 
-alarmDecoder : Decoder Alarm
-alarmDecoder =
+alarmDecoderWithDefault : Decoder Alarm
+alarmDecoderWithDefault =
   oneOf
-    [ activeAlarmDecoder
+    [ alarmDecoder
     , Json.Decode.succeed createDefaultAlarm
     ]
 
-activeAlarmDecoder : Decoder Alarm
-activeAlarmDecoder = 
-  Json.Decode.map (Alarm True) (
-    Json.Decode.map2 Time
-      (field "hour" int)
-      (field "minute" int)
-    )
+alarmDecoder : Decoder Alarm
+alarmDecoder = 
+  Json.Decode.map2 Alarm
+    ( field "isActive" bool )
+    timeDecoder
+
+timeDecoder : Decoder Time
+timeDecoder =
+  Json.Decode.map2 Time
+    ( field "hour" int )
+    ( field "minute" int )
 
 encodeAlarm : Alarm -> Json.Encode.Value
 encodeAlarm alarm =
-  case alarm.isActive of
-    False ->
-      Json.Encode.null
-
-    True ->
       Json.Encode.object
-        [ ( "hour", Json.Encode.int alarm.time.hour )
+        [ ( "isActive", Json.Encode.bool alarm.isActive )
+        , ( "hour", Json.Encode.int alarm.time.hour )
         , ( "minute", Json.Encode.int alarm.time.minute)
         ]
 
@@ -288,7 +288,7 @@ getAlarm username password =
     , headers = [(buildAuthorizationHeader username password)]
     , url = "http://localhost:8080/alarm"
     , body = Http.emptyBody
-    , expect = Http.expectJson ReceivedAlarm alarmDecoder
+    , expect = Http.expectJson ReceivedAlarm alarmDecoderWithDefault
     , timeout = Nothing
     , tracker = Nothing
     }  
