@@ -44,7 +44,7 @@ createDefaultAlarm =
 type State
   = Failure Http.Error
   | Loading
-  | GotAlarm
+  | Loaded
 
 type alias Model =
   { state : State
@@ -110,7 +110,7 @@ update msg model =
     ReceivedAlarm result ->
       case result of
         Ok alarm ->
-          ( { model | alarm = alarm, state = GotAlarm }
+          ( { model | alarm = alarm, state = Loaded }
           , Cmd.none
           )
 
@@ -205,7 +205,7 @@ viewBody model =
     Loading ->
       [ h1 [] [ text "Loading..." ] ]
 
-    GotAlarm ->
+    Loaded ->
         [ h1 [] [ text "Alarm" ]
         , makeActiveCheckbox model.alarm
         , label [ for "isActive" ] [ text " Active " ]
