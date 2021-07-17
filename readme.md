@@ -10,6 +10,18 @@ check the server to download the time of the alarm.
 Also, the device will send its battery level, so the
 user can get notified when the battery is too low.
 
+### Usage
+```
+cd server/target
+java -jar server-dont-wake-my-wife.jar server localhost 9087
+java -jar server-dont-wake-my-wife.jar addUser john@example.com
+java -jar server-dont-wake-my-wife.jar addDevice john@example.com
+
+cd client
+elm reactor
+elm make src/Main.elm
+```
+
 ### Current assumptions
 
 - 1 user = 1 device* = 1 time of alarm
@@ -19,8 +31,6 @@ user can get notified when the battery is too low.
 
 ### TODOs
 
-- Introduce the alarm.isActive to server to store it
-- Client - Load alarm.isActive from DB, don't create default alarm
 - ProductionConnectionProvider - are connections getting closed?  
 - Connection pool
 - Method to estimate battery percentage from check-ins
