@@ -36,17 +36,21 @@ public class GetAlarmHandler extends Handler<UserDto>
 		}
 		DeviceDto device = deviceList.get(0);
 
+		return new Response("{\"alarm\":" + getAlarm(connection, device) + "}");
+	}
+
+	private String getAlarm(Connection connection, DeviceDto device)
+	{
 		AlarmDto alarm = alarmQuery.get(connection, device.id);
 		if (alarm == null)
 		{
-			return new Response(200, "{}");
+			return "{}";
 		}
 		else
 		{
-			return new Response(200,
-					"{\"isActive\":" + alarm.isActive + ","
-							+ "\"hour\":" + alarm.time.getHour() + ","
-							+ "\"minute\":" + alarm.time.getMinute() + "}");
+			return "{\"isActive\":" + alarm.isActive + ","
+					+ "\"hour\":" + alarm.time.getHour() + ","
+					+ "\"minute\":" + alarm.time.getMinute() + "}";
 		}
 	}
 }

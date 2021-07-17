@@ -50,7 +50,7 @@ class AlarmHandlerTest
 	{
 		Assertions.assertThat(getAlarmInGetRequest().body())
 				.as("response body")
-				.isEqualTo("{}");
+				.isEqualTo("{\"alarm\":{}}");
 	}
 
 	@Test
@@ -165,17 +165,18 @@ class AlarmHandlerTest
 				.as("HTTP status code")
 				.isEqualTo(200);
 
-		var responseJson = new JSONObject(response.body());
+		var alarmResponse = new JSONObject(response.body())
+				.getJSONObject("alarm");
 
-		Assertions.assertThat(responseJson.get("isActive"))
+		Assertions.assertThat(alarmResponse.get("isActive"))
 				.as("isActive")
 				.isEqualTo(isActive);
 
-		Assertions.assertThat(responseJson.get("hour"))
+		Assertions.assertThat(alarmResponse.get("hour"))
 				.as("hour")
 				.isEqualTo(hour);
 
-		Assertions.assertThat(responseJson.get("minute"))
+		Assertions.assertThat(alarmResponse.get("minute"))
 				.as("minute")
 				.isEqualTo(minute);
 	}

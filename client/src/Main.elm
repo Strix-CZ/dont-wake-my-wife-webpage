@@ -267,18 +267,16 @@ explainHttpError error =
 
 -- JSON
 
-alarmDecoderWithDefault : Decoder Alarm
-alarmDecoderWithDefault =
-  oneOf
-    [ alarmDecoder
-    , Json.Decode.succeed createDefaultAlarm
-    ]
-
 alarmDecoder : Decoder Alarm
-alarmDecoder = 
-  Json.Decode.map2 Alarm
-    ( field "isActive" bool )
-    timeDecoder
+alarmDecoder =
+  field "alarm" (
+    oneOf
+      [ Json.Decode.map2 Alarm
+        ( field "isActive" bool )
+        timeDecoder
+      , Json.Decode.succeed createDefaultAlarm
+      ]
+  )
 
 timeDecoder : Decoder Time
 timeDecoder =
@@ -305,7 +303,7 @@ getAlarm username password =
     , headers = [(buildAuthorizationHeader username password)]
     , url = (getServerUrl ++ "/alarm")
     , body = Http.emptyBody
-    , expect = Http.expectJson ReceivedAlarm alarmDecoderWithDefault
+    , expect = Http.expectJson ReceivedAlarm alarmDecoder
     , timeout = Nothing
     , tracker = Nothing
     }  

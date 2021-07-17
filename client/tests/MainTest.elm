@@ -7,15 +7,18 @@ import Json.Decode
 import Main exposing (..)
 
 
-decodesSetAlarm : Test
-decodesSetAlarm =
+decodesActiveAlarm : Test
+decodesActiveAlarm =
   test "Decodes a set alarm JSON" <|
     \() ->
       let
         input =
           """
-          { "hour" : 20 
-          , "minute" : 4
+          { "alarm":
+            { "isActive": true
+            , "hour" : 20 
+            , "minute" : 4
+            }
           }
           """
         decodedOutput =
@@ -23,7 +26,7 @@ decodesSetAlarm =
             alarmDecoder input
       in
         Expect.equal decodedOutput
-          ( Ok (SetAlarm
+          ( Ok (Alarm True
             { hour = 20
             , minute = 4
             }
@@ -34,10 +37,10 @@ decodesUnsetAlarm =
   test "Decodes an unset alarm JSON" <|
     \() ->
       let
-        input = "{}"
+        input = """{ "alarm": { } }"""
         decodedOutput =
           Json.Decode.decodeString
             alarmDecoder input
       in
         Expect.equal decodedOutput
-          ( Ok UnsetAlarm )
+          ( Ok (Alarm False (Time 7 0)) )
