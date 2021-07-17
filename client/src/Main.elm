@@ -160,7 +160,7 @@ view model =
     [ style "text-align" "center"
     , style "margin" "100px 50px"
     , style "font-family" "Helvetica, sans-serif"
-    , style "font-size" "large"
+    , style "font-size" "x-large"
     , style "line-height" "2em"
     ]
     ( viewBody model )
@@ -197,11 +197,11 @@ viewLoginScreen previousFailed =
   , Html.form [ onSubmit LogIn ]
     (
       List.append
-      [ input [ type_ "text", placeholder "E-mail", onInput UsernameUpdated ] []
+      [ input (styleInput [ type_ "text", placeholder "E-mail", onInput UsernameUpdated ]) []
       , br [] []
-      , input [ type_ "password", onInput PasswordUpdated ] []
+      , input ( styleInput [ type_ "password", onInput PasswordUpdated ]) []
       , br [] []
-      , input [ type_ "submit", value "Log-in" ] [ ]
+      , input (styleInput [ type_ "submit", value "Log-in" ]) [ ]
       ]
       (
         case previousFailed of
@@ -210,6 +210,14 @@ viewLoginScreen previousFailed =
       )
     )
   ]
+
+styleInput : List (Attribute msg) -> List (Attribute msg)
+styleInput attributes =
+  List.append attributes 
+  [ style "font-size" "large"
+  , style "padding" "0.4em"
+  ]
+
 
 
 makeActiveCheckbox alarm =
@@ -232,6 +240,8 @@ makeTimeInput alarm =
     , value (timeToString alarm.time)
     , onInput TimeUpdated
     , style "height" "2em"
+    , style "padding" "0.8em"
+    , style "font-size" "x-large"
     ]
     []
 
