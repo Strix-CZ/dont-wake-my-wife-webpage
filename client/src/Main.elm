@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onCheck, onSubmit)
 import Http
 import Base64
-import Json.Decode exposing (Decoder, field, int, map2, oneOf, bool)
+import Json.Decode exposing (Decoder, field, int, map2, oneOf, bool, string)
 import Json.Encode
 import ParseInt
 import Array
@@ -49,9 +49,15 @@ type State
   | Loading
   | Loaded
 
+type alias CheckIn =
+  { time : String
+  , battery : Int
+  }
+
 type alias Model =
   { state : State
   , alarm : Alarm
+  , checkIn : Maybe CheckIn
   , username : String
   , password : String
   }
@@ -61,6 +67,7 @@ init : () -> (Model, Cmd Msg)
 init _ =
   ( { state = Loading
     , alarm = createDefaultAlarm
+    , checkIn = Nothing
     , username = ""
     , password = ""
     }
@@ -189,6 +196,8 @@ viewBody model =
         , label [ for "isActive" ] [ text " Active " ]
         , br [] []
         , makeTimeInput model.alarm
+        , br [] []
+        , viewCheckIn model.checkIn
         ]
 
 viewLoginScreen : Bool -> List (Html Msg)
@@ -264,6 +273,24 @@ explainHttpError error =
       "The server responded in an unexpected way. " ++ message
 
 
+viewCheckIn : Maybe CheckIn -> Html Msg
+viewCheckIn maybeCheckIn =
+  div 
+    [ style "font-size" "medium"
+    , style "margin-top" "1em"
+    ]
+    [
+      case maybeCheckIn of
+        Nothing ->
+          text "The device has never been on-line."
+
+        Just checkIn ->
+          text ("Device was last on-line at "
+            ++ checkIn.time
+            ++ " with battery level "
+            ++ (String.fromInt checkIn.battery)
+            ++ ".")
+    ]
 
 -- JSON
 
@@ -292,7 +319,17 @@ encodeAlarm alarm =
         , ( "minute", Json.Encode.int alarm.time.minute)
         ]
 
-
+checkInDecoder : Decoder (Maybe CheckIn)
+checkInDecoder =
+  field "checkIns" (
+      Json.Decode.maybe (
+        Json.Decode.index 0 (
+            Json.Decode.map2 CheckIn
+              (field "time" string)
+              (field "battery" int)
+        )
+      )
+    )
 
 -- HELPERS
 
