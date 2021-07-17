@@ -11,6 +11,13 @@ import Json.Encode
 import ParseInt
 import Array
 
+-- CONFIG
+
+getServerUrl : String
+getServerUrl =
+  --"http://localhost:8080"
+  "https://temer.online/alarm-server"
+
 
 
 -- MAIN
@@ -286,7 +293,7 @@ getAlarm username password =
   Http.request
     { method = "GET"
     , headers = [(buildAuthorizationHeader username password)]
-    , url = "http://localhost:8080/alarm"
+    , url = (getServerUrl ++ "/alarm")
     , body = Http.emptyBody
     , expect = Http.expectJson ReceivedAlarm alarmDecoderWithDefault
     , timeout = Nothing
@@ -300,7 +307,7 @@ postAlarm alarm username password =
   Http.request
     { method = "POST"
     , headers = [(buildAuthorizationHeader username password)]
-    , url = "http://localhost:8080/alarm"
+    , url = (getServerUrl ++ "/alarm")
     , body = Http.jsonBody (encodeAlarm alarm)
     , expect = Http.expectWhatever AlarmUploaded
     , timeout = Nothing
