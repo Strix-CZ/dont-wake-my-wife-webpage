@@ -40,7 +40,7 @@ class AlarmHandlerTest
 	@Test
 	void whenQueried_returns200()
 	{
-		Assertions.assertThat(getAlarmInGetRequest().statusCode())
+		Assertions.assertThat(makeGetRequest().statusCode())
 				.as("status code")
 				.isEqualTo(200);
 	}
@@ -48,16 +48,18 @@ class AlarmHandlerTest
 	@Test
 	void noAlarmsSet_returnsEmptyObject()
 	{
-		Assertions.assertThat(getAlarmInGetRequest().body())
-				.as("response body")
-				.isEqualTo("{\"alarm\":{}}");
+		var alarmResponse = new JSONObject(makeGetRequest().body())
+				.getJSONObject("alarm").toString();
+
+		Assertions.assertThat(alarmResponse)
+				.isEqualTo("{}");
 	}
 
 	@Test
 	void alarmIsSet_returnsIt()
 	{
 		setAlarmInDatabase(device, true, 22, 50);
-		assertAlarm(getAlarmInGetRequest(), true, 22, 50);
+		assertAlarm(makeGetRequest(), true, 22, 50);
 	}
 
 	@Test
@@ -100,7 +102,7 @@ class AlarmHandlerTest
 		setAlarmInDatabase(otherDevice, false, 8, 59);
 		setAlarmInDatabase(device, true, 20, 10);
 
-		assertAlarm(getAlarmInGetRequest(), true, 20, 10);
+		assertAlarm(makeGetRequest(), true, 20, 10);
 	}
 
 	@Test
@@ -110,7 +112,7 @@ class AlarmHandlerTest
 		setAlarmInDatabase(otherDevice, true, 8, 59);
 		setAlarmInPostRequest(false, 20, 10);
 
-		assertAlarm(getAlarmInGetRequest(), false, 20, 10);
+		assertAlarm(makeGetRequest(), false, 20, 10);
 	}
 
 	@Test
@@ -130,7 +132,7 @@ class AlarmHandlerTest
 		new AlarmQuery().insertOrUpdate(connection, alarm);
 	}
 
-	private HttpResponse<String> getAlarmInGetRequest()
+	private HttpResponse<String> makeGetRequest()
 	{
 		try
 		{

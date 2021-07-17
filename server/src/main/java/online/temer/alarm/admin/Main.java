@@ -50,11 +50,12 @@ public class Main
 		DatabaseUserList userList = new DatabaseUserList(userQuery);
 		UserAuthentication userAuthentication = new UserAuthentication(userList);
 		AlarmQuery alarmQuery = new AlarmQuery();
+		DeviceCheckInQuery deviceCheckInQuery = new DeviceCheckInQuery();
 		ExceptionLogger exceptionLogger = new NoOperationExceptionLogger();
 
 		return new Server(
-				new CheckInHandler(deviceAuthentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
-				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery),
+				new CheckInHandler(deviceAuthentication, alarmQuery, deviceCheckInQuery, connectionProvider, exceptionLogger),
+				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery, deviceCheckInQuery),
 				new SetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery));
 	}
 }

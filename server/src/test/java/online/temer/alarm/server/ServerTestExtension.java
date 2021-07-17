@@ -27,11 +27,12 @@ public class ServerTestExtension extends DbTestExtension
 		TestUserAuthentication userAuthentication = new TestUserAuthentication();
 		AlarmQuery alarmQuery = new AlarmQuery();
 		DeviceQuery deviceQuery = new DeviceQuery();
+		DeviceCheckInQuery deviceCheckInQuery = new DeviceCheckInQuery();
 		ExceptionLogger exceptionLogger = new TestExceptionLogger();
 
 		server = new Server(
-				new CheckInHandler(deviceAuthentication, alarmQuery, new DeviceCheckInQuery(), connectionProvider, exceptionLogger),
-				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery),
+				new CheckInHandler(deviceAuthentication, alarmQuery, deviceCheckInQuery, connectionProvider, exceptionLogger),
+				new GetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery, deviceCheckInQuery),
 				new SetAlarmHandler(connectionProvider, userAuthentication, alarmQuery, exceptionLogger, deviceQuery));
 
 		server.start(8765, "localhost");
