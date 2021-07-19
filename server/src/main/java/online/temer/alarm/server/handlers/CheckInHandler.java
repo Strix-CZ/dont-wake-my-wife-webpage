@@ -47,7 +47,7 @@ public class CheckInHandler extends Handler<DeviceDto>
 
 	private String formatAlarm(AlarmDto alarm)
 	{
-		if (alarm == null)
+		if (alarm == null || !alarm.isActive)
 		{
 			return "none";
 		}

@@ -89,6 +89,16 @@ public class CheckInTest
 		Assertions.assertEquals("23:06:00", getLine(response.body(), 1));
 	}
 
+	@Test
+	public void inactiveAlarmSet_checkInSendsNoAlarm()
+	{
+		new AlarmQuery()
+				.insertOrUpdate(connection, new AlarmDto(device.id, false, LocalTime.of(23, 6, 0)));
+		var response = makeGetRequest(100);
+
+		Assertions.assertEquals("none", getLine(response.body(), 1));
+	}
+
 	private String getLine(String text, int lineNumber)
 	{
 		String[] lines = text.split("\n");
