@@ -71,7 +71,7 @@ init _ =
     , username = ""
     , password = ""
     }
-  , (getAlarm "" "")
+  , (getAlarmAndCheckIn "" "")
   )
 
 
@@ -79,7 +79,7 @@ init _ =
 -- UPDATE
 
 type Msg
-  = ReceivedAlarm (Result Http.Error Alarm)
+  = ReceivedAlarmAndCheckIn (Result Http.Error (Alarm, Maybe CheckIn))
   | AlarmUploaded (Result Http.Error ())
   | TimeUpdated String
   | ActiveUpdated Bool
@@ -91,10 +91,10 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    ReceivedAlarm result ->
+    ReceivedAlarmAndCheckIn result ->
       case result of
-        Ok alarm ->
-          ( { model | alarm = alarm, state = Loaded }
+        Ok (alarm, checkIn) ->
+          ( { model | alarm = alarm, checkIn = checkIn, state = Loaded }
           , Cmd.none
           )
 
@@ -137,7 +137,7 @@ update msg model =
       ( { model | password = password}, Cmd.none )      
 
     LogIn ->
-      ( model, (getAlarm model.username model.password ) )
+      ( model, (getAlarmAndCheckIn model.username model.password ) )
 
     AlarmUploaded result ->
       case result of
@@ -294,6 +294,12 @@ viewCheckIn maybeCheckIn =
 
 -- JSON
 
+alarmAndCheckInDecoder : Decoder (Alarm, Maybe CheckIn)
+alarmAndCheckInDecoder =
+  map2 Tuple.pair
+    alarmDecoder
+    checkInDecoder
+
 alarmDecoder : Decoder Alarm
 alarmDecoder =
   field "alarm" (
@@ -333,14 +339,14 @@ checkInDecoder =
 
 -- HELPERS
 
-getAlarm : String -> String -> Cmd Msg
-getAlarm username password =
+getAlarmAndCheckIn : String -> String -> Cmd Msg
+getAlarmAndCheckIn username password =
   Http.request
     { method = "GET"
     , headers = [(buildAuthorizationHeader username password)]
     , url = (getServerUrl ++ "/alarm")
     , body = Http.emptyBody
-    , expect = Http.expectJson ReceivedAlarm alarmDecoder
+    , expect = Http.expectJson ReceivedAlarmAndCheckIn alarmAndCheckInDecoder
     , timeout = Nothing
     , tracker = Nothing
     }  
