@@ -31,8 +31,6 @@ elm make src/Main.elm
 
 ### TODOs
 
-- ProductionConnectionProvider - are connections getting closed?  
-- Connection pool
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
 - Allow users to change and recover passwords.
