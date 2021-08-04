@@ -35,7 +35,7 @@ elm make src/Main.elm
 - Connection pool
 - Method to estimate battery percentage from check-ins
 - Handle to get battery level
-- Deployment
+- Allow users to change and recover passwords.
 
 ### Ideas
 
