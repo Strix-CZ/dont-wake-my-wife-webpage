@@ -48,6 +48,7 @@ type State
   = Failure Http.Error
   | Loading
   | Loaded
+  | Saving
 
 type alias CheckIn =
   { time : String
@@ -109,7 +110,7 @@ update msg model =
           let
             alarm = model.alarm
             newAlarm = { alarm | time = time }
-            newModel = { model | alarm = newAlarm }
+            newModel = { model | alarm = newAlarm, state = Saving }
           in
             ( newModel
             , postAlarm newAlarm model.username model.password
@@ -124,7 +125,7 @@ update msg model =
       let
         alarm = model.alarm
         newAlarm = { alarm | isActive = active }
-        newModel = { model | alarm = newAlarm }
+        newModel = { model | alarm = newAlarm, state = Saving }
       in
         ( newModel
         , postAlarm newAlarm model.username model.password
@@ -142,7 +143,9 @@ update msg model =
     AlarmUploaded result ->
       case result of
         Ok _ ->
-          ( model , Cmd.none )
+          ( { model | state = Loaded }
+          , Cmd.none
+          )
 
         Err error ->
           ( { model | state = Failure error }
@@ -172,6 +175,7 @@ view model =
     ]
     ( viewBody model )
 
+viewBody : Model -> List (Html Msg)
 viewBody model =
   case model.state of
     Failure (Http.BadStatus 401) ->
@@ -191,14 +195,32 @@ viewBody model =
       [ h1 [] [ text "Loading..." ] ]
 
     Loaded ->
-        [ h1 [] [ text "Alarm" ]
-        , makeActiveCheckbox model.alarm
-        , label [ for "isActive" ] [ text " Active " ]
-        , br [] []
-        , makeTimeInput model.alarm
-        , br [] []
-        , viewCheckIn model.checkIn
-        ]
+      viewLoadedModel model
+
+    Saving ->
+      viewLoadedModel model
+        
+
+viewLoadedModel : Model -> List (Html Msg)
+viewLoadedModel model =
+  List.append
+  [ h1 [] [ text "Alarm" ]
+  , makeActiveCheckbox model.alarm
+  , label [ for "isActive" ] [ text " Active " ]
+  , br [] []
+  , makeTimeInput model.alarm
+  , br [] []
+  , viewCheckIn model.checkIn
+  ]
+  (viewSavingAnimation model)
+
+viewSavingAnimation : Model -> List (Html Msg)
+viewSavingAnimation model =
+  case model.state of
+    Saving ->
+      [ h3 [] [ text "Saving..." ] ]
+
+    _ -> []
 
 viewLoginScreen : Bool -> List (Html Msg)
 viewLoginScreen previousFailed =
