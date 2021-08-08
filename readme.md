@@ -32,6 +32,7 @@ elm make src/Main.elm
 ### TODOs
 
 - Method to estimate battery percentage from check-ins
+  https://lygte-info.dk/info/BatteryChargePercent%20UK.html
 - Handle to get battery level
 - Allow users to change and recover passwords.
 
