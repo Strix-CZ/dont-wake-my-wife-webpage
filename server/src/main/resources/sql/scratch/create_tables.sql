@@ -38,9 +38,10 @@ CREATE OR REPLACE TABLE DeviceCheckIn
 
 CREATE OR REPLACE TABLE Alarm
 (
-	kDevice  BIGINT NOT NULL,
-	isActive BOOL   NOT NULL,
-	time     TIME   NOT NULL,
+	kDevice     BIGINT NOT NULL,
+	isActive    BOOL   NOT NULL,
+	time        TIME   NOT NULL,
+	oneTimeDate DATE   NULL,
 
 	PRIMARY KEY (kDevice),
 	FOREIGN KEY (kDevice) REFERENCES Device (id)

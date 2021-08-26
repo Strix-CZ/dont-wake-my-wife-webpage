@@ -4,8 +4,10 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class AlarmQuery
 {
@@ -14,11 +16,12 @@ public class AlarmQuery
 		try
 		{
 			new QueryRunner().update(connection,
-					"INSERT INTO Alarm(kDevice, isActive, time) "
-							+ "VALUES (?, ?, ?) "
+					"INSERT INTO Alarm(kDevice, isActive, time, oneTimeDate) "
+							+ "VALUES (?, ?, ?, ?) "
 							+ "ON DUPLICATE KEY UPDATE "
-							+ "isActive = ?, time = ?",
-					alarm.device, alarm.isActive, alarm.time, alarm.isActive, alarm.time);
+							+ "isActive = ?, time = ?, oneTimeDate = ?",
+					alarm.device, alarm.isActive, alarm.time, alarm.oneTimeDate.orElse(null),
+					alarm.isActive, alarm.time, alarm.oneTimeDate.orElse(null));
 		}
 		catch (SQLException e)
 		{
@@ -69,7 +72,8 @@ public class AlarmQuery
 			return new AlarmDto(
 					rs.getLong("kDevice"),
 					rs.getBoolean("isActive"),
-					rs.getTimestamp("time").toLocalDateTime().toLocalTime());
+					rs.getTimestamp("time").toLocalDateTime().toLocalTime(),
+					Optional.ofNullable(rs.getDate("oneTimeDate")).map(Date::toLocalDate));
 		}
 	}
 }
