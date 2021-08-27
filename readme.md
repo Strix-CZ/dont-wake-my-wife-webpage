@@ -25,6 +25,7 @@ elm make src/Main.elm
 ### Current assumptions
 
 - 1 user = 1 device* = 1 time of alarm
+- Recurrence of alarm = every day
   
 * A user can have multiple devices, but which will be
   used for Alarm handlers is non-deterministic.
@@ -35,6 +36,7 @@ elm make src/Main.elm
   https://lygte-info.dk/info/BatteryChargePercent%20UK.html
 - Handle to get battery level
 - Allow users to change and recover passwords.
+- Extract recurrence of alarms (EveryDayRecurrence, SingleOcurrence, WeeklyRecurrence)
 
 ### Ideas
 
