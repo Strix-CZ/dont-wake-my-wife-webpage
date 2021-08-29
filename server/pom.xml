@@ -53,8 +53,8 @@
 		<!-- This controls logging of the server, see http://www.slf4j.org/codes.html#StaticLoggerBinder -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-nop</artifactId>
-			<version>1.7.31</version>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.32</version>
 		</dependency>
 
 		<dependency>

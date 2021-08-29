@@ -50,12 +50,6 @@ public abstract class Handler<E> implements Route
 			response.status(e.response.getCode());
 			return e.response.getBody();
 		}
-		catch (Exception e)
-		{
-			exceptionLogger.log(e);
-			response.status(500);
-			return "";
-		}
 	}
 
 	public static class Response
