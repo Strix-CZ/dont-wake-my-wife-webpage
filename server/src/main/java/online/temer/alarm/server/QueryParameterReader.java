@@ -5,6 +5,7 @@ import spark.Request;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -59,17 +60,37 @@ public class QueryParameterReader
 
 	public long readLong(String name)
 	{
-		return Long.parseLong(readString(name));
+		try
+		{
+			return Long.parseLong(readString(name));
+		}
+		catch (NumberFormatException e)
+		{
+			throw new IncorrectParameter(name);
+		}
 	}
 
 	public int readInt(String name)
 	{
-		return Integer.parseInt(readString(name));
+		try
+		{
+			return Integer.parseInt(readString(name));
+		}
+		catch (NumberFormatException e)
+		{
+			throw new IncorrectParameter(name);
+		}
 	}
 
 	public ZonedDateTime readTime(String name, TimeZone timeZone)
 	{
-		return LocalDateTime.parse(readString(name), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-				.atZone(timeZone.toZoneId());
+		try
+		{
+			return LocalDateTime.parse(readString(name), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+					.atZone(timeZone.toZoneId());
+		}
+		catch (DateTimeParseException e) {
+			throw new IncorrectParameter(name);
+		}
 	}
 }
