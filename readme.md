@@ -3,7 +3,7 @@
 This repo contains a webserver and client that will be
 used to control a WiFi alarm clock. The alarm clock
 will have a very minimalistic user interface. The
-webpage will be the place to set the alarms. In the
+webpage will be the place to set time of alarm. In the
 future, there might be an app talking to the server
 as well.
 
