@@ -8,9 +8,10 @@ future, there might be an app talking to the server
 as well.
 
 The actual physical device doing the waking-up will
+be very gentle (hence the name). It will periodically
 check the server to download the time of the alarm.
 Also, the device will send its battery level, so the
-user can get notified when the battery is too low.
+user can be notified when the battery is too low.
 
 ### Usage
 ```
